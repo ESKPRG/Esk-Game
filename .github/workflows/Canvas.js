@@ -17,8 +17,8 @@ class Canvas {
     }
 
     start() {
-        this.canvas.width = 1600;
-        this.canvas.height = 900;
+        this.canvas.width = 2000;
+        this.canvas.height = 1000;
         this.canvas.setAttribute('class', 'layer')
         this.canvas.setAttribute('z-index', this.layer)
         this.context = this.canvas.getContext("2d");
@@ -26,7 +26,7 @@ class Canvas {
     }
 
     clear() {
-        this.context.clearRect(0, 0, this.width, this.height);
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     draw() {

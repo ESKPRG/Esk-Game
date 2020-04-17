@@ -27,6 +27,14 @@ class Camera {
         canvas.set(component);
     }
 
+    updateLocations(locationObject) {
+        for (let canvas of this.canvasList) {
+            if (canvas.layer === 1) {
+                canvas.component.update(locationObject);
+            }
+        }
+    }
+
     clear() {
         for (let canvas of this.canvasList) {
             canvas.clear();
@@ -37,6 +45,11 @@ class Camera {
         for (let canvas of this.canvasList) {
             canvas.draw();
         }
+    }
+
+    updateGame() {
+        this.clear();
+        this.update();
     }
 }
 

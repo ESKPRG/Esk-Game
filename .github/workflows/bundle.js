@@ -553,6 +553,14 @@ class Camera {
         canvas.set(component);
     }
 
+    updateLocations(locationObject) {
+        for (let canvas of this.canvasList) {
+            if (canvas.layer === 1) {
+                canvas.component.update(locationObject);
+            }
+        }
+    }
+
     clear() {
         for (let canvas of this.canvasList) {
             canvas.clear();
@@ -563,6 +571,11 @@ class Camera {
         for (let canvas of this.canvasList) {
             canvas.draw();
         }
+    }
+
+    updateGame() {
+        this.clear();
+        this.update();
     }
 }
 
@@ -587,8 +600,8 @@ class Canvas {
     }
 
     start() {
-        this.canvas.width = 1600;
-        this.canvas.height = 900;
+        this.canvas.width = 2000;
+        this.canvas.height = 1000;
         this.canvas.setAttribute('class', 'layer')
         this.canvas.setAttribute('z-index', this.layer)
         this.context = this.canvas.getContext("2d");
@@ -596,7 +609,7 @@ class Canvas {
     }
 
     clear() {
-        this.context.clearRect(0, 0, this.width, this.height);
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     draw() {
@@ -616,11 +629,11 @@ class Canvas {
 module.exports = Canvas;
 },{}],4:[function(require,module,exports){
 class Component {
-    constructor(id, x, y, z, width, height, type, color) {
+    constructor(id, x, y, layer, width, height, type, color) {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.z = z;
+        this.layer = layer;
         this.width = width;
         this.height = height;
         this.type = type;
@@ -641,11 +654,16 @@ class Component {
         }
     }
 
+    update(location) {
+        this.x = location.x;
+        this.y = location.y;
+    }
+
     static block() {
         return new Component(
             1,
-            500, 300,
-            0,
+            300, 300,
+            1,
             200,
             200,
             'block',
@@ -658,8 +676,8 @@ class Component {
             1,
             0, 0,
             0,
-            1600,
-            900,
+            2000,
+            1000,
             'block',
             'white'
         )
@@ -673,7 +691,7 @@ class Controller {
     constructor() {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
         document.body.addEventListener('keydown', (event) => this.keyDownUp('keydown', event.keyCode));
-        document.body.addEventListener('keyup', (event) => this.keyDownUp('keyup', event.keyCode));
+        // document.body.addEventListener('keyup', (event) => this.keyDownUp('keyup', event.keyCode));
     }
 
     setEventTarget(eventTarget) {
@@ -693,7 +711,10 @@ class Controller {
             case 37: this.emitEvent('key', { direction: 'left', down: down}); break;
             case 38: this.emitEvent('key', { direction: 'up', down: down}); break;
             case 39: this.emitEvent('key', { direction: 'right', down: down}); break;
-            case 40: this.emitEvent('key', { direction: 'down', down: down});
+            case 40: this.emitEvent('key', { direction: 'down', down: down}); break;
+            case 90: this.emitEvent('key', {
+                direction: 'refresh', down: undefined
+            })
         }
     }
 }
@@ -717,16 +738,30 @@ class Main extends EE{
         this.controller.setEventTarget(this);
         this.gameSpace = gameSpace;
         this.on('key', (event) => this.keyDown(event.direction, event.down));
+        this.on('click', (event) => this.onClick(event.clientX, event.clientY))
     }
 
     keyDown(direction, down) {
-        console.log(direction, down);
         this.gameSpace.keyDown(direction, down);
+        this.updateGame()
+    }
+
+    updateGame() {
+        this.gameSpace.update()
+        this.camera.updateLocations(this.gameSpace.returnEntityLocations())
+        this.camera.updateGame()
+    }
+
+    onClick(x, y) {
+        this.gameSpace.clickMove(x, y);
     }
 
     start() {
         this.camera.background()
         this.camera.block()
+        setInterval(() => {
+            this.updateGame()
+        }, 20)
     }
 }
 
@@ -742,8 +777,23 @@ class World {
         this.player = {
             velocityX: 0,
             velocityY: 0,
+            movingX: null,
+            movingY: null,
             x: 500,
-            y: 300
+            y: 300,
+            direction: {
+                x: null,
+                y: null
+            },
+            start: {
+                x: null,
+                y: null
+            },
+            width: 200,
+            height: 200,
+            steps: null,
+            currentSteps: 1,
+            moving: false
         };
         
     }
@@ -756,23 +806,74 @@ class World {
     }
 
     update() {
-        this.player.velocityY += this.gravity;
-        this.player.update();
-
-        this.player.velocityX *= this.friction;
-        this.player.velocityY *= this.friction;
-
+        // this.player.velocityX *= this.friction;
+        // this.player.velocityY *= this.friction;
+        this.playerUpdate()
         this.collideObject(this.player)
     }
 
-    refresh(direction, down) {
-        this.x += this.velocityX;
-        this.y += this.velocityY;
+    playerUpdate() {
+        // this.player.x += this.player.velocityX;
+        // this.player.y += this.player.velocityY;
+        // console.log(this.player.x, this.player.y, this.player.movingX, this.player.movingY)
+        // if (this.player.x === this.player.movingX || this.player.y === this.player.movingY) {
+        //     console.log("o")
+        //     this.player.movingY = null;
+        //     this.player.movingX = null;
+        //     this.player.velocityX = 0;
+        //     this.player.velocityY = 0;
+        // }
+        if (this.player.moving) {
+            console.log(this.player.x, this.player.start.x, this.player.currentSteps, this.player.direction.x)
+            this.player.x = this.player.start.x + this.player.direction.x * this.player.currentSteps;
+            this.player.y = this.player.start.y + this.player.direction.y *this.player.currentSteps;
+            if (this.player.currentSteps < this.player.steps) {
+                this.player.currentSteps += 1;
+            } else {
+                this.player.moving = false;
+                this.player.start.x = null;
+                this.player.start.y = null;
+            }
+        }
+        
+    }
+    
+    returnEntityLocations() {
+        return {
+            x: this.player.x,
+            y: this.player.y
+        }
     }
 
     keyDown(direction, down) {
-
+        if (down) {
+            switch(direction) {
+                case 'up': this.moveUp(); break;
+                case 'down': this.moveDown(); break;
+                case 'left': this.moveLeft(); break;
+                case 'right': this.moveRight();
+            }
+            this.playerUpdate()
+        }
     }
+
+    clickMove(x, y) {
+        this.player.currentSteps = 1;
+        this.player.start.x = this.player.x;
+        this.player.start.y = this.player.y;
+        x -= 720 - this.player.width / 2;
+        y -= 257 + this.player.height /2;
+
+        let xabs = Math.abs(x - this.player.x);
+        let yabs = Math.abs(y - this.player.y);
+        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+        this.player.steps = Math.floor(length) / 25;
+        this.player.moving = true;
+        this.player.direction.x = (x - this.player.x) / this.player.steps;
+        this.player.direction.y = (y - this.player.y) / this.player.steps;
+    }
+
+
 
     // jumpUp() {
     //     if (!this.jumping) {
@@ -781,8 +882,10 @@ class World {
     //     }
     // }
 
-    moveLeft() { this.velocityX -= 0.5; }
-    moveRight() { this.velocityX += 0.5; }
+    moveLeft(x) { this.player.velocityX = x; }
+    moveRight(x) { this.player.velocityX = x; }
+    moveUp(x) { this.player.velocityY = x; }
+    moveDown(x) { this.player.velocityY = x; }
 }
 
 
@@ -792,16 +895,16 @@ const Engine = require('./Main.js');
 const World = require('./World.js')
 
 
-const engine = new Engine(new World(
+const engine = new Engine(
+    new World(
     0.8,
-    0.2,
+    0.8,
     null,
-    1600,
-    900
+    1000,
+    2000
 ))
 
 engine.start();
-
 
 
 },{"./Main.js":6,"./World.js":7}]},{},[8]);

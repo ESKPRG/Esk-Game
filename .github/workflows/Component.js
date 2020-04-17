@@ -1,9 +1,9 @@
 class Component {
-    constructor(id, x, y, z, width, height, type, color) {
+    constructor(id, x, y, layer, width, height, type, color) {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.z = z;
+        this.layer = layer;
         this.width = width;
         this.height = height;
         this.type = type;
@@ -24,11 +24,16 @@ class Component {
         }
     }
 
+    update(location) {
+        this.x = location.x;
+        this.y = location.y;
+    }
+
     static block() {
         return new Component(
             1,
-            500, 300,
-            0,
+            300, 300,
+            1,
             200,
             200,
             'block',
@@ -41,8 +46,8 @@ class Component {
             1,
             0, 0,
             0,
-            1600,
-            900,
+            2000,
+            1000,
             'block',
             'white'
         )

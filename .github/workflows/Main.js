@@ -15,16 +15,30 @@ class Main extends EE{
         this.controller.setEventTarget(this);
         this.gameSpace = gameSpace;
         this.on('key', (event) => this.keyDown(event.direction, event.down));
+        this.on('click', (event) => this.onClick(event.clientX, event.clientY))
     }
 
     keyDown(direction, down) {
-        console.log(direction, down);
         this.gameSpace.keyDown(direction, down);
+        this.updateGame()
+    }
+
+    updateGame() {
+        this.gameSpace.update()
+        this.camera.updateLocations(this.gameSpace.returnEntityLocations())
+        this.camera.updateGame()
+    }
+
+    onClick(x, y) {
+        this.gameSpace.clickMove(x, y);
     }
 
     start() {
         this.camera.background()
         this.camera.block()
+        setInterval(() => {
+            this.updateGame()
+        }, 20)
     }
 }
 
