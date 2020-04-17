@@ -17,7 +17,7 @@ const Body = require('./Body.js')
 
 class Knight extends character {
     constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList) {
-        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, character.GOOD)
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, character.GOOD, Character.KNIGHT)
     }
 
     static create(name) {

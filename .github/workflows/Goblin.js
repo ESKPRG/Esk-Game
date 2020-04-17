@@ -14,14 +14,16 @@ const status = require('./status.js');
 
 
 class Goblin extends character {
-    constructor(name, description, stats, status, inventory, abilityList) {
-        super(name, description, stats, inventory, character.GOBLIN, status, abilityList, character.EVIL)
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList) {
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, character.EVIL, Character.GOBLIN);
     }
 
     static create(name) {
         return new Goblin(
             name,
             "A Goblin stinking of Evil and Greed. Truly a pitiful creature.",
+            "assets/goblin-1.png",
+            300, 300, 200, 200,
             new stats(
                 new attack(5),
                 new defense(5),
@@ -34,7 +36,8 @@ class Goblin extends character {
             new inventory(),
             new abilityList([
                 fighterAbilities.createBash()
-            ])
+            ]),
+            new abilityList()
         )
     }
 }

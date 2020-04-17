@@ -8,11 +8,12 @@ const intelligence = require('./intelligence.js');
 const experience = require('./experience.js');
 const speed = require('./speed.js');
 const Hammer = require('./Hammer.js')
+const Status = require('./Status.js');
 
 
 class Blacksmith extends Npc {
-    constructor(name, description, stats, inventory, hammer, favor) {
-        super(name, description, stats, inventory, Npc.BLACKSMITH, favor)
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, occupation, favor, hammer) {
+        super(name, description, image, x, y, width, height, interactable.NPC, stats, inventory, status, body, abilityList, occupation, favor);
         this.hammer = hammer;
     }
 
@@ -20,6 +21,10 @@ class Blacksmith extends Npc {
         return new Blacksmith(
             "Blacksmith Adrian",
             "The Blacksmith of your town. Don't mess with this guy.",
+            "assets/Blacksmith-1.png",
+            300, 300,
+            300,
+            300,
             new stats(
                 new attack(20),
                 new defense(25),
@@ -29,8 +34,12 @@ class Blacksmith extends Npc {
                 new experience()
             ),
             new inventory(),
-            new Hammer(),
-            0
+            new Status(),
+            new Body(),
+            new abilityList([]),
+            Npc.BLACKSMITH,
+            0,
+            new Hammer()
         )
     }
 }
