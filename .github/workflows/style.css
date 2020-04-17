@@ -17,7 +17,7 @@ body {
   border: solid 25px black;
   position: relative;
   width: 2000px;
-  height: 1250px;
+  height: 1000px;
 }
 
 #mainBox canvas {
@@ -26,7 +26,7 @@ body {
   left: 0;
 }
 
-canvas {
+/* canvas {
   background-color: transparent;
-}
+} */
 
