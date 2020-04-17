@@ -1,12 +1,11 @@
-const npc = require('./npc.js');
+const Npc = require('./npc.js');
 
 
-class Character extends npc {
-    constructor(name, description, stats, inventory, occupation, status, abilityList, team) {
-        super(name, description, stats, inventory, occupation)
-        this.status = status
-        this.abilityList = abilityList;
+class Character extends Npc {
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, team) {
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, Npc.ADVENTURER, 0)
         this.team = team;
+
     }
 
     useRandomAbility(enemyList) {

@@ -11,18 +11,24 @@ const experience = require('./experience.js');
 const fighterAbilities = require('./fighterAbilities.js');
 const samuraiAbilities = require('./samuraiAbilities.js')
 const speed = require('./speed.js');
-const status = require('./Status.js')
+const status = require('./Status.js');
+const Body = require('./Body.js')
 
 
 class Knight extends character {
-    constructor(name, description, stats, status, inventory, abilityList) {
-        super(name, description, stats, inventory, character.KNIGHT, status, abilityList, character.GOOD)
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList) {
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, character.GOOD)
     }
 
     static create(name) {
         return new Knight(
             name,
             "A Knight from the reaches of Valhara",
+            'assets/Warrior-2.png',
+            null,
+            null,
+            200,
+            200,
             new stats(
                 new attack(10),
                 new defense(5),
@@ -31,8 +37,9 @@ class Knight extends character {
                 new speed(10),
                 new experience()
             ),
-            new status(),
             new inventory(),
+            new status(),
+            new Body(),
             new abilityList([
                 fighterAbilities.createBash(),
                 samuraiAbilities.createSlash()
