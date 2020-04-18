@@ -15,6 +15,6 @@ class Interactable extends Entity {
 }
 
 Interactable.USABLE = 'usable';
-Interactable.NPC = 'npc';
+Interactable.PERSON = 'person';
 
 module.exports = Interactable;                                     
