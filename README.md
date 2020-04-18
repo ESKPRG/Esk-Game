@@ -19,3 +19,35 @@ Byte is in the browser or on mobile phones. I hope for the production of the mob
 Why is Byte?
 Just cause. You know. Improving programming n' stuff.
 
+Game Guide: 
+
+    -Classes:
+        -Demi God;
+        -Pyrokinetic;
+        -Hunter;
+        -Fire Wizard;
+        -Lightning Wizard;
+        -Earth Wizard;
+        -Dark Matter Wizard;
+        -Monk;
+        -Heavy Sword Handler (couldn't think of a name, gymlad);
+        -Assassin;
+        -Depraved;
+
+
+All object's properties will be seperated into different classes:
+
+    -Stats
+        -Strength (Higher attack damage, can carry more)
+        -Dexterity (Higher Movement speed, can react to things faster)
+        -Endurace (Higher stamina, endurance to attacks and conditions)
+        -Intelligence (Higher spell damage, better decisions) 
+        -Constitution (Higher health, but more weight)
+        -Memory (Can remember more spells)
+        -Wits (Can more easily find secrets)
+        -Luck (higher luck lol)
+        -Faith (higher 'special' power)
+    -Status: Where debuffs, buffs are located on the character;
+    -Inventory: Where a character stores items;
+    -Body: Body parts can equip items and can be crippled (like in fallout), (includes things like energy, hunger, thirst)
+    -State: The current state of the character like their health, stamina and weight (need more ideas)
