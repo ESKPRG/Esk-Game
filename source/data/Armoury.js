@@ -1,10 +1,37 @@
 const Building = require('./Building.js')
+const Door = require('./Door.js')
+const Blacksmith = require('./Blacksmith.js')
+const Forge = require('./Forge.js');
+const Anvil = require('./Anvil.js');
+const ArmouryUpgradePlan = require('./ArmouryUpgradePlan.js');
 
 class Armoury extends Building {
-    constructor(upgrade, state, blacksmith, forge, anvil, x, y) {
-        super('blacksmith',upgrade, state, blacksmith, x, y)
-        this.forge = forge
-        this.anvil = anvil
+    constructor(name, description, image, x, y, width, height, planeSpace, door, npc, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, planeSpace, door, npc, state, level, upgradePlan, insideImage);
+
+    }
+
+    base(x, y) {
+        const ArmouryUpgrade = new ArmouryUpgradePlan()
+        ArmouryUpgrade.prepare();
+
+        return new Armoury(
+            "Armoury",
+            "An armoury",
+            '',
+            x, y,
+            400, 300,
+            [
+                new Forge(),
+                new Anvil()
+            ],
+            new Door(),
+            Blacksmith.create(),
+            Building.CLOSED,
+            1,
+            ArmouryUpgrade,
+            ""
+        )
     }
 
     anvilUpgrade() {

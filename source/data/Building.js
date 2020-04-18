@@ -1,15 +1,17 @@
-class Building {
-    constructor(name, upgrades, state, npc, x, y) {
-        this.level = 1
-        this.name = name;
-        this.upgrades = upgrades
-        this.state = state
+const Plane = require('./Plane.js');
+
+
+class Building extends Plane {
+    constructor(name, description, image, x, y, width, height, planeSpace, door, npc, state, level, upgradePlan) {
+        super(name, description, image, x, y, width, height, planeSpace);
+        this.door = door;
         this.npc = npc;
-        this.x = x;
-        this.y = y;
-        this.width = 500;
-        this.height = 300;
+        this.state = state;
+        this.level = level;
+        this.upgradePlan = upgradePlan;
+        this.insideImage = insideImage;
     }
+    
 
     retrieveBuildingLocation() {
         let dict = {};

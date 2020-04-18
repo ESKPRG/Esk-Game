@@ -17,12 +17,12 @@ class Blacksmith extends Npc {
         this.hammer = hammer;
     }
 
-    static create() {
+    static create(x, y) {
         return new Blacksmith(
             "Blacksmith Adrian",
             "The Blacksmith of your town. Don't mess with this guy.",
             "assets/Blacksmith-1.png",
-            300, 300,
+            x, y,
             300,
             300,
             new stats(

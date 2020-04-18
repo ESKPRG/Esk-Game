@@ -11,16 +11,16 @@ const Status = require('./Status.js')
 const Body = require('./Body.js')
 
 class ShopKeeper extends Npc {
-    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, occupation, favor) {
-        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, Npc.SHOPKEEPER, 0);
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, favor) {
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, Npc.SHOPKEEPER, favor);
     }
 
-    static create() {
+    static create(x, y) {
         return new ShopKeeper(
             "Shop keeper steve",
             "The one guy that'll sell you anything",
             "assets/ShopKeeper-1.png",
-            1000, 400,
+            x, y,
             300,
             300,
             new stats(
@@ -32,10 +32,9 @@ class ShopKeeper extends Npc {
                 new experience()
             ),
             new inventory(),
-            new status(),
+            new Status(),
             new Body(),
             new abilityList(),
-            Npc.SHOPKEEPER,
             0
         )
     }
