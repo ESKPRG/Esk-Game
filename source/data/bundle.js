@@ -524,6 +524,66 @@ function functionBindPolyfill(context) {
 }
 
 },{}],2:[function(require,module,exports){
+const Entity = require('./Entity.js');
+
+class Attribute extends Entity {
+    constructor(name, description, image, x, y, width, height, level, multiplier) {
+        super(name, description, image, x, y, width, height, Entity.ATTRIBUTE, level, multiplier);
+        this.baseLevel = level;
+        this.level = level;
+        this.multiplier = multiplier;
+        this.baseMultiplier = multiplier;
+    }
+}
+
+module.exports = Attribute;
+},{"./Entity.js":13}],3:[function(require,module,exports){
+const Character = require('./Character.js');
+const Stats = require('./Stats.js');
+const State = require('./State.js');
+const Inventory = require('./Inventory.js');
+const Person = require('./Person.js');
+
+class Brawler extends Character {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
+    }
+
+    static create(name, x, y) {
+        return new Brawler(
+            name, 
+            "Brawler",
+            "",
+            x, y,
+            100,
+            100,
+            Stats.create(
+                10, 2,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 2
+            ),
+            new State(
+                100,
+                100,
+                60, //kg
+                0
+            ),
+            new Inventory(),
+            null,
+            null, //new body after change
+            Person.GOOD
+        )
+    }
+}
+
+module.exports = Brawler;
+},{"./Character.js":6,"./Inventory.js":17,"./Person.js":21,"./State.js":22,"./Stats.js":23}],4:[function(require,module,exports){
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
 
@@ -531,15 +591,9 @@ class Camera {
     constructor(destination) {
         this.canvasList = [];
         this.destination = destination;
+        this.onState = false;
     }
 
-    block() {
-        this.addNewComponent(Component.block())
-    }
-
-    background() {
-        this.addNewComponent(Component.background())
-    }
 
     createNewLayer(layer) {
         let canvas = new Canvas(this.destination, layer);
@@ -548,15 +602,24 @@ class Camera {
         return canvas;
     }
 
-    addNewComponent(component) {
+    addNewComponent(entity) {
+        let component;
+        switch(entity.description) {
+            case "DemiGod": component = Component.demiGod(entity); break;
+            case "Brawler": component = Component.block(entity);
+        }
         let canvas = this.createNewLayer(component.layer);
         canvas.set(component);
     }
 
     updateLocations(locationObject) {
-        for (let canvas of this.canvasList) {
-            if (canvas.layer === 1) {
-                canvas.component.update(locationObject);
+        for (let object of Object.values(locationObject)) {
+            for (let canvas of this.canvasList) {
+                if (canvas.layer !== 0) {
+                    if (object.id === canvas.layer) {
+                        canvas.component.update(object)
+                    }
+                }
             }
         }
     }
@@ -580,7 +643,7 @@ class Camera {
 }
 
 module.exports = Camera;
-},{"./Canvas.js":3,"./Component.js":4}],3:[function(require,module,exports){
+},{"./Canvas.js":5,"./Component.js":7}],5:[function(require,module,exports){
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
@@ -600,8 +663,8 @@ class Canvas {
     }
 
     start() {
-        this.canvas.width = 2000;
-        this.canvas.height = 1000;
+        this.canvas.width = document.body.clientWidth;
+        this.canvas.height = document.body.clientHeight;
         this.canvas.setAttribute('class', 'layer')
         this.canvas.setAttribute('z-index', this.layer)
         this.context = this.canvas.getContext("2d");
@@ -627,7 +690,22 @@ class Canvas {
 }
 
 module.exports = Canvas;
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+const Person = require('./Person.js');
+
+class Character extends Person {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, characterClass) {
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Person.CHARACTER);
+        this.characterClass = characterClass;
+    }
+}
+
+Character.DEMIGOD = 'demigod';
+
+
+
+module.exports = Character;
+},{"./Person.js":21}],7:[function(require,module,exports){
 class Component {
     constructor(id, x, y, layer, width, height, type, color) {
         this.id = id;
@@ -645,7 +723,6 @@ class Component {
             this.image = new Image();
             this.image.src = this.color;
             this.image.addEventListener('load', e => {
-                console.log(e)
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             });
         } else {
@@ -654,30 +731,43 @@ class Component {
         }
     }
 
-    update(location) {
-        this.x = location.x;
-        this.y = location.y;
+    update(object) {
+        this.x = object.x;
+        this.y = object.y;
     }
 
-    static block() {
+    static demiGod(character) {
         return new Component(
-            1,
-            300, 300,
-            1,
-            200,
-            200,
+            character.id,
+            character.x, character.y,
+            character.id,
+            character.width,
+            character.height,
             'block',
-            'red'
+            "red"
+        )
+    }
+    static block(character) {
+        return new Component(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            character.width,
+            character.height,
+            'block',
+            'blue'
         )
     }
 
+
     static background() {
         return new Component(
-            1,
+            0,
             0, 0,
             0,
-            2000,
-            1000,
+            document.body.clientWidth,
+            document.body.clientHeight,
             'block',
             'white'
         )
@@ -686,7 +776,28 @@ class Component {
 }
 
 module.exports = Component;
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Constitution extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Constitution(
+            "Constitution",
+            "How resiliant a person is to natural or man-made attacks",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Constitution;
+},{"./Attribute.js":2}],9:[function(require,module,exports){
 class Controller {
     constructor() {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
@@ -715,10 +826,230 @@ class Controller {
 }
 
 module.exports = Controller;
-},{}],6:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+const Character = require('./Character.js');
+const Stats = require('./Stats.js');
+const State = require('./State.js');
+const Inventory = require('./Inventory.js');
+const Person = require('./Person.js');
+
+class DemiGod extends Character {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
+    }
+
+    static create(name, x, y) {
+        return new DemiGod(
+            name, 
+            "DemiGod",
+            "",
+            x, y,
+            100,
+            100,
+            Stats.create(
+                10, 2,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 1,
+                10, 2
+            ),
+            new State(
+                100,
+                100,
+                60, //kg
+                0
+            ),
+            new Inventory(),
+            null,
+            null, //new body after change
+            Person.GOOD
+        )
+    }
+}
+
+module.exports = DemiGod;
+},{"./Character.js":6,"./Inventory.js":17,"./Person.js":21,"./State.js":22,"./Stats.js":23}],11:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Dexterity extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Dexterity(
+            "Dexterity",
+            "How fast a person can move, or react to things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Dexterity;
+},{"./Attribute.js":2}],12:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Endurance extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Endurance(
+            "Endurance",
+            "blah",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Endurance;
+},{"./Attribute.js":2}],13:[function(require,module,exports){
+class Entity {
+    constructor(name, description, image, x, y, width, height, entityType) {
+        this.id = Math.floor((Math.random() * 1000000) + 1);
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.entityType = entityType;
+    }
+}
+
+Entity.INTERACTABLE = 'interactable';
+Entity.MISCELLANEOUS = 'miscellaneous';
+Entity.PLANE = 'plane';
+Entity.ATTRIBUTE = 'attribute';
+Entity.QUEST = 'quest';
+
+module.exports = Entity;
+},{}],14:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Faith extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Faith(
+            "Faith",
+            "How well a person carry things, or hit things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Faith;
+},{"./Attribute.js":2}],15:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Intelligence extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Intelligence(
+            "Intelligence",
+            "brains",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+
+}
+
+module.exports = Intelligence;
+},{"./Attribute.js":2}],16:[function(require,module,exports){
+const Entity = require('./Entity.js')
+
+class Interactable extends Entity {
+    constructor(name, description, image, x, y, width, height, interactableType, stats, state, inventory, endurance) {
+        super(name, description, image, x, y, width, height, Entity.INTERACTABLE)
+        this.interactableType = interactableType;
+        this.stats = stats;
+        this.state = state;
+        this.inventory = inventory;
+        this.endurance = endurance;
+        this.use = function(user) {
+            console.log(user, "Used")
+        }
+    }
+}
+
+Interactable.USABLE = 'usable';
+Interactable.PERSON = 'person';
+
+module.exports = Interactable;                                     
+},{"./Entity.js":13}],17:[function(require,module,exports){
+class Inventory {
+    constructor() {
+        this.list = []
+        this.weight = 0;
+    }
+
+    add(item) {
+        this.list.push(item)
+    }
+
+    take(item) {
+        for (let piece in this.list) {
+            if (item === this.list[piece]) {
+                let final = this.list[piece];
+                this.list.splice(piece, 1);
+                return final;
+            }
+        }
+    }
+}
+
+module.exports = Inventory;
+},{}],18:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Luck extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Luck(
+            "Luck",
+            "How well a person carry things, or hit things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Luck;
+},{"./Attribute.js":2}],19:[function(require,module,exports){
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
+const DemiGod = require('./DemiGod.js');
+const Brawler = require('./Brawler.js');
 
 let divGameScreen = document.createElement('div');
 divGameScreen.setAttribute('id', 'mainBox')
@@ -736,24 +1067,31 @@ class Main extends EE{
         this.on('click', (event) => this.onClick(event.clientX, event.clientY))
     }
 
+    addCharacter(character) {
+        this.gameSpace.addCharacter(character);
+        this.camera.addNewComponent(character);
+    }
+
     keyDown(direction, down) {
         this.gameSpace.keyDown(direction, down);
         this.updateGame()
     }
 
     updateGame() {
-        this.gameSpace.update()
+        this.gameSpace.update(this.camera.onState)
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
     onClick(x, y) {
-        this.gameSpace.clickMove(x, y);
+        this.gameSpace.clickMove(x, y, this.camera.onState);
     }
 
     start() {
-        this.camera.background()
-        this.camera.block()
+        this.addCharacter(DemiGod.create("d", 600, 900))
+        this.addCharacter(DemiGod.create("yigit", 800,
+         800))
+        this.addCharacter(Brawler.create("f", 500, 500))
         setInterval(() => {
             this.updateGame()
         }, 20)
@@ -761,7 +1099,176 @@ class Main extends EE{
 }
 
 module.exports = Main;
-},{"./Camera.js":2,"./Controller.js":5,"events":1}],7:[function(require,module,exports){
+},{"./Brawler.js":3,"./Camera.js":4,"./Controller.js":9,"./DemiGod.js":10,"events":1}],20:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Memory extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Memory(
+            "Memory",
+            "ability memory",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Memory;
+},{"./Attribute.js":2}],21:[function(require,module,exports){
+const Interactable = require('./Interactable.js');
+
+class Person extends Interactable {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
+        super(name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
+        this.body = body;
+        this.alliance = alliance;
+        this.personType = personType;
+    }
+}
+
+Person.CHARACTER = 'character';
+Person.NPC = 'npc';
+
+Person.GOOD = 'good';
+Person.LAWFULGOOD = 'lawfulGood'
+Person.EVIL = 'evil';
+
+module.exports = Person;
+},{"./Interactable.js":16}],22:[function(require,module,exports){
+const Entity = require('./Entity.js');
+const Status = require('./Status.js');
+
+class State extends Entity {
+    constructor(health, stamina, weight, chi) {
+        super("State", "Character/object's current state", "", 0, 0, 0, 0); //x, y, width, height all 0 at start, but they can be expanded
+        this.status = new Status();
+        this.health = health;
+        this.healthCap = health;
+        this.stamina = stamina;
+        this.staminaCap = stamina;
+        this.weight = weight;
+        this.chi = chi;
+    }
+}
+
+module.exports = State;
+},{"./Entity.js":13,"./Status.js":24}],23:[function(require,module,exports){
+const S = require('./Strength.js');
+const D = require('./Dexterity.js');
+const E = require('./Endurance.js');
+const I = require('./Intelligence.js');
+const C = require('./Constitution.js');
+const M = require('./Memory.js');
+const W = require('./Wits.js');
+const L = require('./Luck.js');
+const F = require('./Faith.js');
+
+
+class Stats {
+    constructor(strength, dexterity, endurance, intelligence, constitution, memory, wits, luck, faith) {
+        this.strength = strength;
+        this.dexterity = dexterity;
+        this.endurance = endurance;
+        this.intelligence = intelligence;
+        this.constitution = constitution;
+        this.memory = memory;
+        this.wits = wits;
+        this.luck = luck;
+        this.faith = faith;
+    }
+
+    static create(str, strM, dex, dexM, end, endM, int, intM, cons, consM, mem, memM, wits, witsM, luck, luckM, faith, faithM) {
+        return new Stats(
+            S.create(str, strM),
+            D.create(dex, dexM),
+            E.create(end, endM),
+            I.create(int, intM),
+            C.create(cons, consM),
+            M.create(mem, memM),
+            W.create(wits, witsM),
+            L.create(luck, luckM),
+            F.create(faith, faithM)
+        )
+    }
+
+}
+
+module.exports = Stats;
+},{"./Constitution.js":8,"./Dexterity.js":11,"./Endurance.js":12,"./Faith.js":14,"./Intelligence.js":15,"./Luck.js":18,"./Memory.js":20,"./Strength.js":25,"./Wits.js":26}],24:[function(require,module,exports){
+class Status {
+    constructor() {
+        this.buff = []
+        this.debuff = []
+    }
+
+    applyEffect(effect) {
+        this[effect.type].push(effect)
+    }
+
+    removeEffect(effect) {
+        for (let x = 0; x < this[effect.type].length; x++) {
+            if (this[effect.type][x].name === effect.name) {
+                this[effect.type].splice(x);
+                break;
+            }
+        }
+    }
+
+
+}
+
+module.exports = Status
+},{}],25:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Strength extends Attribute {
+    constructor(name, description, image, width, height, level, multipler) {
+        super(name, description, image, 0, 0, width, height, level, multipler);
+    }
+
+    static create(level, multiplier) {
+        return new Strength(
+            "Strength",
+            "How well a person carry things, or hit things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Strength;
+},{"./Attribute.js":2}],26:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Wits extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Wits(
+            "Wits",
+            "reaction speed",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Wits;
+},{"./Attribute.js":2}],27:[function(require,module,exports){
+const DemiGod = require('./DemiGod.js');
+
 class World {
     constructor(gravity, friction, home, height, width) {
         this.gravity = gravity;
@@ -769,29 +1276,14 @@ class World {
         this.home = home;
         this.height = height;
         this.width = width;
-        this.player = {
-            character: null,
-            velocityX: 0,
-            velocityY: 0,
-            movingX: null,
-            movingY: null,
-            x: 500,
-            y: 300,
-            direction: {
-                x: null,
-                y: null
-            },
-            start: {
-                x: null,
-                y: null
-            },
-            width: 200,
-            height: 200,
-            steps: null,
-            currentSteps: 1,
-            moving: false
-        };
+        this.entityList = [
+        ]
+        this.player = null;
         
+    }
+
+    addCharacter(character) {
+        this.entityList.push(character);
     }
 
     collideObject(object) {
@@ -801,44 +1293,89 @@ class World {
         else if (object.y + object.height > this.height) { object.y = this.height - object.height;  }
     }
 
-    update() {
-        // this.player.velocityX *= this.friction;
-        // this.player.velocityY *= this.friction;
-        this.playerUpdate()
-        this.collideObject(this.player)
+    collisionCheck(mainObject, object) {
+        if (mainObject.x < object.x && mainObject.x + mainObject.width > object.x && mainObject.y > object.y && mainObject.y < object.y + object.height) {
+            mainObject.x = object.x - mainObject.width;
+        } else if (mainObject.x > object.x && mainObject.x < object.x + object.width && mainObject.y > object.y && mainObject.y < object.y + object.height) {
+            mainObject.x = object.x + object.width;
+        } else if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            mainObject.y = object.y + mainObject.height;
+        } else if (mainObject.y > object.y && object.y + object.height > mainObject.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            mainObject.y = object.y + object.height;
+        }
     }
 
-    playerUpdate() {
-        // this.player.x += this.player.velocityX;
-        // this.player.y += this.player.velocityY;
-        // console.log(this.player.x, this.player.y, this.player.movingX, this.player.movingY)
-        // if (this.player.x === this.player.movingX || this.player.y === this.player.movingY) {
-        //     console.log("o")
-        //     this.player.movingY = null;
-        //     this.player.movingX = null;
-        //     this.player.velocityX = 0;
-        //     this.player.velocityY = 0;
-        // }
-        if (this.player.moving) {
-            console.log(this.player.x, this.player.start.x, this.player.currentSteps, this.player.direction.x)
-            this.player.x = this.player.start.x + this.player.direction.x * this.player.currentSteps;
-            this.player.y = this.player.start.y + this.player.direction.y *this.player.currentSteps;
-            if (this.player.currentSteps < this.player.steps) {
-                this.player.currentSteps += 1;
-            } else {
-                this.player.moving = false;
-                this.player.start.x = null;
-                this.player.start.y = null;
+    update() {
+        this.player = this.entityList[0];
+        if (this.cameraState) {
+            this.player.x = document.body.clientWidth / 2;
+            this.player.y = document.body.clientHeight / 2;
+        }
+        this.entityListPositionUpdate();
+        let playerInEntity;
+        for (let entity of this.entityList) {
+            if (entity === this.player) {
+                playerInEntity = entity;
             }
         }
-        
+        this.collideObject(playerInEntity)
+        for (let entity of this.entityList) {
+            if (entity !== playerInEntity) {
+                this.collisionCheck(playerInEntity, entity)
+            }
+        }
+    }
+
+    entityListPositionUpdate() {
+        if (this.player.moving) {
+            if (!this.cameraState) {
+                let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
+
+                playerInEntity.x = playerInEntity.start.x + playerInEntity.direction.x * playerInEntity.currentSteps;
+                playerInEntity.y = playerInEntity.start.y + playerInEntity.direction.y * playerInEntity.currentSteps;
+                if (playerInEntity.currentSteps < playerInEntity.steps) {
+                    playerInEntity.currentSteps += 1;
+                } else {
+                    playerInEntity.moving = false;
+                    playerInEntity.start.x = null;
+                    playerInEntity.start.y = null;
+                }
+            } else {
+                for (let entity of this.entityList) {
+                    if (entity !== this.player) {
+                        entity.x = entity.start.x - entity.direction.x * entity.currentSteps;
+                        entity.y = entity.start.y - entity.direction.y * entity.currentSteps;
+                        if (entity.currentSteps < entity.steps) {
+                            entity.currentSteps += 1;
+                        } else {
+                            this.player.moving = false;
+                            entity.moving = false;
+                            entity.start.x = null;
+                            entity.start.y = null;
+                        }
+                    }
+                }
+            }
+        } 
+
     }
     
     returnEntityLocations() {
-        return {
-            x: this.player.x,
-            y: this.player.y
+        let final = {};
+        for (let idx = 0; idx < this.entityList.length; idx++) {
+            let entity = this.entityList[idx];
+            final[idx] = {
+                id: entity.id,
+                x: entity.x,
+                y: entity.y
+            }
         }
+        return final;
     }
 
     keyDown(direction, down) {
@@ -849,24 +1386,66 @@ class World {
                 case 'left': this.moveLeft(); break;
                 case 'right': this.moveRight();
             }
-            this.playerUpdate()
         }
     }
 
-    clickMove(x, y) {
-        this.player.currentSteps = 1;
-        this.player.start.x = this.player.x;
-        this.player.start.y = this.player.y;
-        x -= 720 - this.player.width / 2;
-        y -= 257 + this.player.height /2;
+    clickMove(x, y, cameraState) {
+        this.cameraState = cameraState;
+        if (!cameraState) {
+            let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
 
-        let xabs = Math.abs(x - this.player.x);
-        let yabs = Math.abs(y - this.player.y);
-        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-        this.player.steps = Math.floor(length) / 25;
-        this.player.moving = true;
-        this.player.direction.x = (x - this.player.x) / this.player.steps;
-        this.player.direction.y = (y - this.player.y) / this.player.steps;
+            playerInEntity.currentSteps = 1;
+            playerInEntity.start = {};
+            playerInEntity.start.x = playerInEntity.x;
+            playerInEntity.start.y = playerInEntity.y;
+            x -= playerInEntity.width / 2;
+            y -= playerInEntity.height / 2;
+
+            let xabs = Math.abs(x - playerInEntity.x);
+            let yabs = Math.abs(y - playerInEntity.y);
+            let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+            playerInEntity.steps = Math.floor(length) / 25;
+            playerInEntity.moving = true;
+            playerInEntity.direction = {};
+            playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
+            console.log(playerInEntity.steps)
+            playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
+            playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
+        } else {
+            for (let entity of this.entityList) {
+                let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
+                if (entity !== this.player) {
+                    entity.currentSteps = 1;
+                    entity.start = {}
+                    entity.start.x = entity.x;
+                    entity.start.y = entity.y;
+                    let xchange = playerInEntity.x - x;
+                    let ychange = playerInEntity.y - y;
+                    x = entity.x + xchange + playerInEntity.width / 2;
+                    y = entity.y + ychange + playerInEntity.height / 2;
+
+                    let xabs = Math.abs(entity.start.x + x);
+                    let yabs = Math.abs(entity.start.y + y);
+                    let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+                    entity.steps = Math.floor(length) / 25;
+                    entity.moving = true;
+                    entity.direction = {};
+                    entity.direction.x = (entity.x - x) / entity.steps;
+                    entity.direction.y = (entity.y - y) / entity.steps;
+                    playerInEntity.moving = true;
+                }
+            }
+        }
     }
 
 
@@ -886,7 +1465,7 @@ class World {
 
 
 module.exports = World;
-},{}],8:[function(require,module,exports){
+},{"./DemiGod.js":10}],28:[function(require,module,exports){
 const Engine = require('./Main.js');
 const World = require('./World.js')
 
@@ -896,11 +1475,11 @@ const engine = new Engine(
     0.8,
     0.8,
     null,
-    1000,
-    2000
+    document.body.clientHeight,
+    document.body.clientWidth
 ))
 
 engine.start();
 
 
-},{"./Main.js":6,"./World.js":7}]},{},[8]);
+},{"./Main.js":19,"./World.js":27}]},{},[28]);

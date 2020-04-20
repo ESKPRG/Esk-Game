@@ -1,3 +1,5 @@
+const DemiGod = require('./DemiGod.js');
+
 class World {
     constructor(gravity, friction, home, height, width) {
         this.gravity = gravity;
@@ -5,29 +7,14 @@ class World {
         this.home = home;
         this.height = height;
         this.width = width;
-        this.player = {
-            character: null,
-            velocityX: 0,
-            velocityY: 0,
-            movingX: null,
-            movingY: null,
-            x: 500,
-            y: 300,
-            direction: {
-                x: null,
-                y: null
-            },
-            start: {
-                x: null,
-                y: null
-            },
-            width: 200,
-            height: 200,
-            steps: null,
-            currentSteps: 1,
-            moving: false
-        };
+        this.entityList = [
+        ]
+        this.player = null;
         
+    }
+
+    addCharacter(character) {
+        this.entityList.push(character);
     }
 
     collideObject(object) {
@@ -37,44 +24,89 @@ class World {
         else if (object.y + object.height > this.height) { object.y = this.height - object.height;  }
     }
 
-    update() {
-        // this.player.velocityX *= this.friction;
-        // this.player.velocityY *= this.friction;
-        this.playerUpdate()
-        this.collideObject(this.player)
+    collisionCheck(mainObject, object) {
+        if (mainObject.x < object.x && mainObject.x + mainObject.width > object.x && mainObject.y > object.y && mainObject.y < object.y + object.height) {
+            mainObject.x = object.x - mainObject.width;
+        } else if (mainObject.x > object.x && mainObject.x < object.x + object.width && mainObject.y > object.y && mainObject.y < object.y + object.height) {
+            mainObject.x = object.x + object.width;
+        } else if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            mainObject.y = object.y + mainObject.height;
+        } else if (mainObject.y > object.y && object.y + object.height > mainObject.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            mainObject.y = object.y + object.height;
+        }
     }
 
-    playerUpdate() {
-        // this.player.x += this.player.velocityX;
-        // this.player.y += this.player.velocityY;
-        // console.log(this.player.x, this.player.y, this.player.movingX, this.player.movingY)
-        // if (this.player.x === this.player.movingX || this.player.y === this.player.movingY) {
-        //     console.log("o")
-        //     this.player.movingY = null;
-        //     this.player.movingX = null;
-        //     this.player.velocityX = 0;
-        //     this.player.velocityY = 0;
-        // }
-        if (this.player.moving) {
-            console.log(this.player.x, this.player.start.x, this.player.currentSteps, this.player.direction.x)
-            this.player.x = this.player.start.x + this.player.direction.x * this.player.currentSteps;
-            this.player.y = this.player.start.y + this.player.direction.y *this.player.currentSteps;
-            if (this.player.currentSteps < this.player.steps) {
-                this.player.currentSteps += 1;
-            } else {
-                this.player.moving = false;
-                this.player.start.x = null;
-                this.player.start.y = null;
+    update() {
+        this.player = this.entityList[0];
+        if (this.cameraState) {
+            this.player.x = document.body.clientWidth / 2;
+            this.player.y = document.body.clientHeight / 2;
+        }
+        this.entityListPositionUpdate();
+        let playerInEntity;
+        for (let entity of this.entityList) {
+            if (entity === this.player) {
+                playerInEntity = entity;
             }
         }
-        
+        this.collideObject(playerInEntity)
+        for (let entity of this.entityList) {
+            if (entity !== playerInEntity) {
+                this.collisionCheck(playerInEntity, entity)
+            }
+        }
+    }
+
+    entityListPositionUpdate() {
+        if (this.player.moving) {
+            if (!this.cameraState) {
+                let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
+
+                playerInEntity.x = playerInEntity.start.x + playerInEntity.direction.x * playerInEntity.currentSteps;
+                playerInEntity.y = playerInEntity.start.y + playerInEntity.direction.y * playerInEntity.currentSteps;
+                if (playerInEntity.currentSteps < playerInEntity.steps) {
+                    playerInEntity.currentSteps += 1;
+                } else {
+                    playerInEntity.moving = false;
+                    playerInEntity.start.x = null;
+                    playerInEntity.start.y = null;
+                }
+            } else {
+                for (let entity of this.entityList) {
+                    if (entity !== this.player) {
+                        entity.x = entity.start.x - entity.direction.x * entity.currentSteps;
+                        entity.y = entity.start.y - entity.direction.y * entity.currentSteps;
+                        if (entity.currentSteps < entity.steps) {
+                            entity.currentSteps += 1;
+                        } else {
+                            this.player.moving = false;
+                            entity.moving = false;
+                            entity.start.x = null;
+                            entity.start.y = null;
+                        }
+                    }
+                }
+            }
+        } 
+
     }
     
     returnEntityLocations() {
-        return {
-            x: this.player.x,
-            y: this.player.y
+        let final = {};
+        for (let idx = 0; idx < this.entityList.length; idx++) {
+            let entity = this.entityList[idx];
+            final[idx] = {
+                id: entity.id,
+                x: entity.x,
+                y: entity.y
+            }
         }
+        return final;
     }
 
     keyDown(direction, down) {
@@ -85,24 +117,66 @@ class World {
                 case 'left': this.moveLeft(); break;
                 case 'right': this.moveRight();
             }
-            this.playerUpdate()
         }
     }
 
-    clickMove(x, y) {
-        this.player.currentSteps = 1;
-        this.player.start.x = this.player.x;
-        this.player.start.y = this.player.y;
-        x -= 720 - this.player.width / 2;
-        y -= 257 + this.player.height /2;
+    clickMove(x, y, cameraState) {
+        this.cameraState = cameraState;
+        if (!cameraState) {
+            let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
 
-        let xabs = Math.abs(x - this.player.x);
-        let yabs = Math.abs(y - this.player.y);
-        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-        this.player.steps = Math.floor(length) / 25;
-        this.player.moving = true;
-        this.player.direction.x = (x - this.player.x) / this.player.steps;
-        this.player.direction.y = (y - this.player.y) / this.player.steps;
+            playerInEntity.currentSteps = 1;
+            playerInEntity.start = {};
+            playerInEntity.start.x = playerInEntity.x;
+            playerInEntity.start.y = playerInEntity.y;
+            x -= playerInEntity.width / 2;
+            y -= playerInEntity.height / 2;
+
+            let xabs = Math.abs(x - playerInEntity.x);
+            let yabs = Math.abs(y - playerInEntity.y);
+            let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+            playerInEntity.steps = Math.floor(length) / 25;
+            playerInEntity.moving = true;
+            playerInEntity.direction = {};
+            playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
+            console.log(playerInEntity.steps)
+            playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
+            playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
+        } else {
+            for (let entity of this.entityList) {
+                let playerInEntity;
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
+                    }
+                }
+                if (entity !== this.player) {
+                    entity.currentSteps = 1;
+                    entity.start = {}
+                    entity.start.x = entity.x;
+                    entity.start.y = entity.y;
+                    let xchange = playerInEntity.x - x;
+                    let ychange = playerInEntity.y - y;
+                    x = entity.x + xchange + playerInEntity.width / 2;
+                    y = entity.y + ychange + playerInEntity.height / 2;
+
+                    let xabs = Math.abs(entity.start.x + x);
+                    let yabs = Math.abs(entity.start.y + y);
+                    let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+                    entity.steps = Math.floor(length) / 25;
+                    entity.moving = true;
+                    entity.direction = {};
+                    entity.direction.x = (entity.x - x) / entity.steps;
+                    entity.direction.y = (entity.y - y) / entity.steps;
+                    playerInEntity.moving = true;
+                }
+            }
+        }
     }
 
 
