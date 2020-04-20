@@ -14,8 +14,9 @@ class Entity {
 
 Entity.INTERACTABLE = 'interactable';
 Entity.MISCELLANEOUS = 'miscellaneous';
-Entity.PLANE = 'plane';
+Entity.PLAIN = 'plain';
 Entity.ATTRIBUTE = 'attribute';
 Entity.QUEST = 'quest';
+Entity.LOCATION = 'location'
 
 module.exports = Entity;

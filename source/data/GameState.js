@@ -1,16 +1,14 @@
 const DemiGod = require('./DemiGod.js');
 
-class World {
-    constructor(gravity, friction, home, height, width) {
+class GameState {
+    constructor(gravity, world, height, width) {
         this.gravity = gravity;
-        this.friction = friction;
-        this.home = home;
+        this.world = world;
         this.height = height;
         this.width = width;
-        this.entityList = [
-        ]
+        this.entityList = []
         this.player = null;
-        
+        this.cameraState = false;
     }
 
     addCharacter(character) {
@@ -120,9 +118,8 @@ class World {
         }
     }
 
-    clickMove(x, y, cameraState) {
-        this.cameraState = cameraState;
-        if (!cameraState) {
+    clickMove(x, y) {
+        if (!this.cameraState) {
             let playerInEntity;
                 for (let entity of this.entityList) {
                     if (entity === this.player) {
@@ -195,4 +192,4 @@ class World {
 }
 
 
-module.exports = World;
+module.exports = GameState;

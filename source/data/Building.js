@@ -1,11 +1,10 @@
-const Plane = require('./Plane.js');
+const Plain = require('./Plain.js');
+const Door = require('./Door.js');
 
-
-class Building extends Plane {
-    constructor(name, description, image, x, y, width, height, planeSpace, door, npc, state, level, upgradePlan) {
-        super(name, description, image, x, y, width, height, planeSpace);
-        this.door = door;
-        this.npc = npc;
+class Building extends Plain {
+    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, plainSpace);
+        this.door = Door.create();
         this.state = state;
         this.level = level;
         this.upgradePlan = upgradePlan;
@@ -14,13 +13,12 @@ class Building extends Plane {
     
 
     retrieveBuildingLocation() {
-        let dict = {};
-        dict[this.name] = [this.x, this.y, this.width, this.height];
-        return dict;
-    }
-
-    retrieveNpc() {
-        return this.npc;
+        return {
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height
+        };
     }
 
     open() {

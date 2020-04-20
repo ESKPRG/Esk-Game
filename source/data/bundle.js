@@ -537,53 +537,63 @@ class Attribute extends Entity {
 }
 
 module.exports = Attribute;
-},{"./Entity.js":13}],3:[function(require,module,exports){
-const Character = require('./Character.js');
-const Stats = require('./Stats.js');
-const State = require('./State.js');
-const Inventory = require('./Inventory.js');
-const Person = require('./Person.js');
+},{"./Entity.js":19}],3:[function(require,module,exports){
+// const Head = require('./Head.js');
+// const Chest = require('./Chest.js');
+// const Legs = require('./Legs.js');
+// const Arms = require('./Arms.js')
+// const Feet = require('./Feet.js');
+// const LHand = require('./lHand.js');
+// const RHand = require('./rHand.js');
+// const Shoulder = require('./Shoulder.js');
+// const LFinger = require('./LFinger.js');
+// const RFinger = require('./RFinger.js');
 
-class Brawler extends Character {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
-    }
-
-    static create(name, x, y) {
-        return new Brawler(
-            name, 
-            "Brawler",
-            "",
-            x, y,
-            100,
-            100,
-            Stats.create(
-                10, 2,
-                10, 1,
-                10, 1,
-                10, 1,
-                10, 1,
-                10, 1,
-                10, 1,
-                10, 1,
-                10, 2
-            ),
-            new State(
-                100,
-                100,
-                60, //kg
-                0
-            ),
-            new Inventory(),
-            null,
-            null, //new body after change
-            Person.GOOD
-        )
+class Body {
+    constructor(head, chest, legs, arms, feet, lHand, rHand, shoulder, lFinger, rFinger) {
+        // this.head = new Head();
+        // this.chest = new Chest();
+        // this.legs = new Legs();
     }
 }
 
-module.exports = Brawler;
-},{"./Character.js":6,"./Inventory.js":17,"./Person.js":21,"./State.js":22,"./Stats.js":23}],4:[function(require,module,exports){
+module.exports = Body;
+},{}],4:[function(require,module,exports){
+const Plain = require('./Plain.js');
+const Door = require('./Door.js');
+
+class Building extends Plain {
+    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, plainSpace);
+        this.door = Door.create();
+        this.state = state;
+        this.level = level;
+        this.upgradePlan = upgradePlan;
+        this.insideImage = insideImage;
+    }
+    
+
+    retrieveBuildingLocation() {
+        return {
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height
+        };
+    }
+
+    open() {
+        this.state = Building.OPEN;
+    }
+
+    
+}
+
+Building.OPEN = 'Active'
+Building.CLOSED = 'Inactive'
+
+module.exports = Building
+},{"./Door.js":15,"./Plain.js":32}],5:[function(require,module,exports){
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
 
@@ -643,7 +653,7 @@ class Camera {
 }
 
 module.exports = Camera;
-},{"./Canvas.js":5,"./Component.js":7}],5:[function(require,module,exports){
+},{"./Canvas.js":6,"./Component.js":8}],6:[function(require,module,exports){
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
@@ -690,7 +700,7 @@ class Canvas {
 }
 
 module.exports = Canvas;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 const Person = require('./Person.js');
 
 class Character extends Person {
@@ -705,7 +715,7 @@ Character.DEMIGOD = 'demigod';
 
 
 module.exports = Character;
-},{"./Person.js":21}],7:[function(require,module,exports){
+},{"./Person.js":31}],8:[function(require,module,exports){
 class Component {
     constructor(id, x, y, layer, width, height, type, color) {
         this.id = id;
@@ -776,7 +786,7 @@ class Component {
 }
 
 module.exports = Component;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Constitution extends Attribute {
@@ -797,7 +807,7 @@ class Constitution extends Attribute {
 }
 
 module.exports = Constitution;
-},{"./Attribute.js":2}],9:[function(require,module,exports){
+},{"./Attribute.js":2}],10:[function(require,module,exports){
 class Controller {
     constructor() {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
@@ -826,7 +836,25 @@ class Controller {
 }
 
 module.exports = Controller;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+const Location = require('./Location.js')
+
+class Country extends Location {
+    constructor(name, description, image, x, y, width, height, locationsMap, religion, wealth) {
+        super(name, description, image, x, y, width, height, locationsMap)
+        this.religion = religion;
+        this.wealth = wealth;
+    }
+}
+
+
+Country.POOR = 'poor';
+Country.AVERAGE = 'average';
+Country.RICH = 'rich';
+
+module.exports = Country;
+
+},{"./Location.js":27}],12:[function(require,module,exports){
 const Character = require('./Character.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -872,7 +900,7 @@ class DemiGod extends Character {
 }
 
 module.exports = DemiGod;
-},{"./Character.js":6,"./Inventory.js":17,"./Person.js":21,"./State.js":22,"./Stats.js":23}],11:[function(require,module,exports){
+},{"./Character.js":7,"./Inventory.js":25,"./Person.js":31,"./State.js":40,"./Stats.js":41}],13:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Dexterity extends Attribute {
@@ -893,7 +921,119 @@ class Dexterity extends Attribute {
 }
 
 module.exports = Dexterity;
-},{"./Attribute.js":2}],12:[function(require,module,exports){
+},{"./Attribute.js":2}],14:[function(require,module,exports){
+const Location = require('./Location.js');
+
+class District extends Location {
+    constructor(name, description, image, x, y, width, height, locationsMap) {
+        super(name, description, image, x, y, width, height, locationsMap);
+    }
+
+    static create(locationsMap, name) {
+        return new District(
+            name,
+            "", //description
+            "", //image
+            0, 0,
+            0, 0,
+            locationsMap
+        )
+    }
+}
+
+module.exports = District;
+},{"./Location.js":27}],15:[function(require,module,exports){
+const Props = require('./Props.js');
+const Stats = require('./Stats.js');
+const State = require('./State.js');
+const Inventory = require('./Inventory.js');
+
+class Door extends Props {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount);
+        this.locked = false;
+    }
+
+    static create() {
+        return new Door(
+            "Door",
+            "A wooden door",
+            "",
+            0, 0,
+            0, 0,
+            Stats.create(
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1
+            ),
+            new State(
+                100,
+                0,
+                50,
+                0
+            ),
+            new Inventory(),
+            100,
+            200,
+            null
+        )
+    }
+}
+
+module.exports = Door;
+},{"./Inventory.js":25,"./Props.js":34,"./State.js":40,"./Stats.js":41}],16:[function(require,module,exports){
+const Planet = require('./Planet.js');
+const Greece = require('./Greece.js');
+const Italy = require('./Italy.js')
+const School = require('./School.js');
+const District = require('./District');
+const ShoppingMall = require('./ShoppingMall.js')
+const Shop = require('./Shop.js')
+
+class Earth extends Planet {
+    constructor(countryList, name) {
+        super(name, countryList)
+    }
+
+    static create() {
+        return new Earth([
+            Greece.create({
+                1: District.create({
+                    1: School.greekSchool(),
+                },
+                "School district"),
+                2: District.create({
+                    1: ShoppingMall.create({
+                        1: Shop.create(),
+                        2: Shop.create()
+                    })
+                }, "Shopping district")
+            }),
+            Italy.create({
+                1: District.create({
+                    1: School.greekSchool(),
+                },
+                "School district"),
+                2: District.create({
+                    1: ShoppingMall.create({
+                        1: Shop.create()
+                    })
+                }, "Shopping district")
+            })
+        ],
+        "Earth")
+    }
+    
+}
+
+module.exports = Earth
+},{"./District":14,"./Greece.js":22,"./Italy.js":26,"./Planet.js":33,"./School.js":35,"./Shop.js":36,"./ShoppingMall.js":39}],17:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Endurance extends Attribute {
@@ -914,7 +1054,63 @@ class Endurance extends Attribute {
 }
 
 module.exports = Endurance;
-},{"./Attribute.js":2}],13:[function(require,module,exports){
+},{"./Attribute.js":2}],18:[function(require,module,exports){
+const Camera = require('./Camera.js');
+const Controller = require('./Controller.js');
+const EE = require('events');
+
+let divGameScreen = document.createElement('div');
+divGameScreen.setAttribute('id', 'mainBox')
+document.body.appendChild(divGameScreen)
+
+
+class Engine extends EE{
+    constructor(gameSpace, refreshRate, zoom) {
+        super()
+        this.camera = new Camera(divGameScreen)
+        this.controller = new Controller();
+        this.controller.setEventTarget(this);
+        this.gameSpace = gameSpace;
+        this.refreshRate = refreshRate;
+        this.zoom = zoom;
+        this.on('key', (event) => this.keyDown(event.direction, event.down));
+        this.on('click', (event) => this.onClick(event.clientX, event.clientY));
+        this.gameState = {
+            scene: "mainScreen"
+        }
+    }
+
+    addCharacter(character) {
+        this.gameSpace.addCharacter(character);
+        this.camera.addNewComponent(character);
+    }
+
+    keyDown(direction, down) {
+        this.gameSpace.keyDown(direction, down);
+        this.updateGame()
+    }
+
+    updateGame() {
+        if (this.gameState.scene === "inGame") {
+            this.gameSpace.update()
+        }
+        this.camera.updateLocations(this.gameSpace.returnEntityLocations())
+        this.camera.updateGame()
+    }
+
+    onClick(x, y) {
+        this.gameSpace.clickMove(x, y);
+    }
+
+    start() {
+        setInterval(() => {
+            this.updateGame()
+        }, this.refreshRate)
+    }
+}
+
+module.exports = Engine;
+},{"./Camera.js":5,"./Controller.js":10,"events":1}],19:[function(require,module,exports){
 class Entity {
     constructor(name, description, image, x, y, width, height, entityType) {
         this.id = Math.floor((Math.random() * 1000000) + 1);
@@ -931,12 +1127,13 @@ class Entity {
 
 Entity.INTERACTABLE = 'interactable';
 Entity.MISCELLANEOUS = 'miscellaneous';
-Entity.PLANE = 'plane';
+Entity.PLAIN = 'plain';
 Entity.ATTRIBUTE = 'attribute';
 Entity.QUEST = 'quest';
+Entity.LOCATION = 'location'
 
 module.exports = Entity;
-},{}],14:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Faith extends Attribute {
@@ -957,329 +1154,18 @@ class Faith extends Attribute {
 }
 
 module.exports = Faith;
-},{"./Attribute.js":2}],15:[function(require,module,exports){
-const Attribute = require('./Attribute.js');
-
-class Intelligence extends Attribute {
-    constructor(name, description, image, width, height, entityType, level, multiplier) {
-        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
-    }
-
-    static create(level, multiplier) {
-        return new Intelligence(
-            "Intelligence",
-            "brains",
-            "",
-            50, 50,
-            level,
-            multiplier
-        )
-    }
-
-}
-
-module.exports = Intelligence;
-},{"./Attribute.js":2}],16:[function(require,module,exports){
-const Entity = require('./Entity.js')
-
-class Interactable extends Entity {
-    constructor(name, description, image, x, y, width, height, interactableType, stats, state, inventory, endurance) {
-        super(name, description, image, x, y, width, height, Entity.INTERACTABLE)
-        this.interactableType = interactableType;
-        this.stats = stats;
-        this.state = state;
-        this.inventory = inventory;
-        this.endurance = endurance;
-        this.use = function(user) {
-            console.log(user, "Used")
-        }
-    }
-}
-
-Interactable.USABLE = 'usable';
-Interactable.PERSON = 'person';
-
-module.exports = Interactable;                                     
-},{"./Entity.js":13}],17:[function(require,module,exports){
-class Inventory {
-    constructor() {
-        this.list = []
-        this.weight = 0;
-    }
-
-    add(item) {
-        this.list.push(item)
-    }
-
-    take(item) {
-        for (let piece in this.list) {
-            if (item === this.list[piece]) {
-                let final = this.list[piece];
-                this.list.splice(piece, 1);
-                return final;
-            }
-        }
-    }
-}
-
-module.exports = Inventory;
-},{}],18:[function(require,module,exports){
-const Attribute = require('./Attribute.js');
-
-class Luck extends Attribute {
-    constructor(name, description, image, width, height, entityType, level, multiplier) {
-        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
-    }
-
-    static create(level, multiplier) {
-        return new Luck(
-            "Luck",
-            "How well a person carry things, or hit things",
-            "",
-            50, 50,
-            level,
-            multiplier
-        )
-    }
-}
-
-module.exports = Luck;
-},{"./Attribute.js":2}],19:[function(require,module,exports){
-const Camera = require('./Camera.js');
-const Controller = require('./Controller.js');
-const EE = require('events');
-const DemiGod = require('./DemiGod.js');
-const Brawler = require('./Brawler.js');
-
-let divGameScreen = document.createElement('div');
-divGameScreen.setAttribute('id', 'mainBox')
-document.body.appendChild(divGameScreen)
-
-
-class Main extends EE{
-    constructor(gameSpace) {
-        super()
-        this.camera = new Camera(divGameScreen)
-        this.controller = new Controller();
-        this.controller.setEventTarget(this);
-        this.gameSpace = gameSpace;
-        this.on('key', (event) => this.keyDown(event.direction, event.down));
-        this.on('click', (event) => this.onClick(event.clientX, event.clientY))
-    }
-
-    addCharacter(character) {
-        this.gameSpace.addCharacter(character);
-        this.camera.addNewComponent(character);
-    }
-
-    keyDown(direction, down) {
-        this.gameSpace.keyDown(direction, down);
-        this.updateGame()
-    }
-
-    updateGame() {
-        this.gameSpace.update(this.camera.onState)
-        this.camera.updateLocations(this.gameSpace.returnEntityLocations())
-        this.camera.updateGame()
-    }
-
-    onClick(x, y) {
-        this.gameSpace.clickMove(x, y, this.camera.onState);
-    }
-
-    start() {
-        this.addCharacter(DemiGod.create("d", 600, 900))
-        this.addCharacter(DemiGod.create("yigit", 800,
-         800))
-        this.addCharacter(Brawler.create("f", 500, 500))
-        setInterval(() => {
-            this.updateGame()
-        }, 20)
-    }
-}
-
-module.exports = Main;
-},{"./Brawler.js":3,"./Camera.js":4,"./Controller.js":9,"./DemiGod.js":10,"events":1}],20:[function(require,module,exports){
-const Attribute = require('./Attribute.js');
-
-class Memory extends Attribute {
-    constructor(name, description, image, width, height, entityType, level, multiplier) {
-        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
-    }
-
-    static create(level, multiplier) {
-        return new Memory(
-            "Memory",
-            "ability memory",
-            "",
-            50, 50,
-            level,
-            multiplier
-        )
-    }
-}
-
-module.exports = Memory;
 },{"./Attribute.js":2}],21:[function(require,module,exports){
-const Interactable = require('./Interactable.js');
-
-class Person extends Interactable {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
-        super(name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
-        this.body = body;
-        this.alliance = alliance;
-        this.personType = personType;
-    }
-}
-
-Person.CHARACTER = 'character';
-Person.NPC = 'npc';
-
-Person.GOOD = 'good';
-Person.LAWFULGOOD = 'lawfulGood'
-Person.EVIL = 'evil';
-
-module.exports = Person;
-},{"./Interactable.js":16}],22:[function(require,module,exports){
-const Entity = require('./Entity.js');
-const Status = require('./Status.js');
-
-class State extends Entity {
-    constructor(health, stamina, weight, chi) {
-        super("State", "Character/object's current state", "", 0, 0, 0, 0); //x, y, width, height all 0 at start, but they can be expanded
-        this.status = new Status();
-        this.health = health;
-        this.healthCap = health;
-        this.stamina = stamina;
-        this.staminaCap = stamina;
-        this.weight = weight;
-        this.chi = chi;
-    }
-}
-
-module.exports = State;
-},{"./Entity.js":13,"./Status.js":24}],23:[function(require,module,exports){
-const S = require('./Strength.js');
-const D = require('./Dexterity.js');
-const E = require('./Endurance.js');
-const I = require('./Intelligence.js');
-const C = require('./Constitution.js');
-const M = require('./Memory.js');
-const W = require('./Wits.js');
-const L = require('./Luck.js');
-const F = require('./Faith.js');
-
-
-class Stats {
-    constructor(strength, dexterity, endurance, intelligence, constitution, memory, wits, luck, faith) {
-        this.strength = strength;
-        this.dexterity = dexterity;
-        this.endurance = endurance;
-        this.intelligence = intelligence;
-        this.constitution = constitution;
-        this.memory = memory;
-        this.wits = wits;
-        this.luck = luck;
-        this.faith = faith;
-    }
-
-    static create(str, strM, dex, dexM, end, endM, int, intM, cons, consM, mem, memM, wits, witsM, luck, luckM, faith, faithM) {
-        return new Stats(
-            S.create(str, strM),
-            D.create(dex, dexM),
-            E.create(end, endM),
-            I.create(int, intM),
-            C.create(cons, consM),
-            M.create(mem, memM),
-            W.create(wits, witsM),
-            L.create(luck, luckM),
-            F.create(faith, faithM)
-        )
-    }
-
-}
-
-module.exports = Stats;
-},{"./Constitution.js":8,"./Dexterity.js":11,"./Endurance.js":12,"./Faith.js":14,"./Intelligence.js":15,"./Luck.js":18,"./Memory.js":20,"./Strength.js":25,"./Wits.js":26}],24:[function(require,module,exports){
-class Status {
-    constructor() {
-        this.buff = []
-        this.debuff = []
-    }
-
-    applyEffect(effect) {
-        this[effect.type].push(effect)
-    }
-
-    removeEffect(effect) {
-        for (let x = 0; x < this[effect.type].length; x++) {
-            if (this[effect.type][x].name === effect.name) {
-                this[effect.type].splice(x);
-                break;
-            }
-        }
-    }
-
-
-}
-
-module.exports = Status
-},{}],25:[function(require,module,exports){
-const Attribute = require('./Attribute.js');
-
-class Strength extends Attribute {
-    constructor(name, description, image, width, height, level, multipler) {
-        super(name, description, image, 0, 0, width, height, level, multipler);
-    }
-
-    static create(level, multiplier) {
-        return new Strength(
-            "Strength",
-            "How well a person carry things, or hit things",
-            "",
-            50, 50,
-            level,
-            multiplier
-        )
-    }
-}
-
-module.exports = Strength;
-},{"./Attribute.js":2}],26:[function(require,module,exports){
-const Attribute = require('./Attribute.js');
-
-class Wits extends Attribute {
-    constructor(name, description, image, width, height, entityType, level, multiplier) {
-        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
-    }
-
-    static create(level, multiplier) {
-        return new Wits(
-            "Wits",
-            "reaction speed",
-            "",
-            50, 50,
-            level,
-            multiplier
-        )
-    }
-}
-
-module.exports = Wits;
-},{"./Attribute.js":2}],27:[function(require,module,exports){
 const DemiGod = require('./DemiGod.js');
 
-class World {
-    constructor(gravity, friction, home, height, width) {
+class GameState {
+    constructor(gravity, world, height, width) {
         this.gravity = gravity;
-        this.friction = friction;
-        this.home = home;
+        this.world = world;
         this.height = height;
         this.width = width;
-        this.entityList = [
-        ]
+        this.entityList = []
         this.player = null;
-        
+        this.cameraState = false;
     }
 
     addCharacter(character) {
@@ -1389,9 +1275,8 @@ class World {
         }
     }
 
-    clickMove(x, y, cameraState) {
-        this.cameraState = cameraState;
-        if (!cameraState) {
+    clickMove(x, y) {
+        if (!this.cameraState) {
             let playerInEntity;
                 for (let entity of this.entityList) {
                     if (entity === this.player) {
@@ -1464,22 +1349,699 @@ class World {
 }
 
 
-module.exports = World;
-},{"./DemiGod.js":10}],28:[function(require,module,exports){
-const Engine = require('./Main.js');
-const World = require('./World.js')
+module.exports = GameState;
+},{"./DemiGod.js":12}],22:[function(require,module,exports){
+const Country = require('./Country.js');
+
+class Greece extends Country {
+    constructor(name, description, image, x, y, width, height, locationsMap, religion, wealth){
+        super(name, description, image, x, y, width, height, locationsMap, religion, wealth);
+    }
+
+    static create(locationsMap) {
+        return new Greece(
+            "Greece",
+            "The country Greece",
+            "",
+            0, 0,
+            0, 0,
+            locationsMap,
+            "Greek",
+            Country.RICH
+        )
+    }
+}
+
+module.exports = Greece;
+},{"./Country.js":11}],23:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Intelligence extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Intelligence(
+            "Intelligence",
+            "brains",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+
+}
+
+module.exports = Intelligence;
+},{"./Attribute.js":2}],24:[function(require,module,exports){
+const Entity = require('./Entity.js')
+
+class Interactable extends Entity {
+    constructor(name, description, image, x, y, width, height, interactableType, stats, state, inventory, endurance) {
+        super(name, description, image, x, y, width, height, Entity.INTERACTABLE)
+        this.interactableType = interactableType;
+        this.stats = stats;
+        this.state = state;
+        this.inventory = inventory;
+        this.endurance = endurance;
+        this.use = function(user) {
+            console.log(user, "Used")
+        }
+    }
+}
+
+Interactable.USABLE = 'usable';
+Interactable.PERSON = 'person';
+
+module.exports = Interactable;                                     
+},{"./Entity.js":19}],25:[function(require,module,exports){
+class Inventory {
+    constructor() {
+        this.list = []
+        this.weight = 0;
+    }
+
+    add(item) {
+        this.list.push(item)
+    }
+
+    take(item) {
+        for (let piece in this.list) {
+            if (item === this.list[piece]) {
+                let final = this.list[piece];
+                this.list.splice(piece, 1);
+                return final;
+            }
+        }
+    }
+}
+
+module.exports = Inventory;
+},{}],26:[function(require,module,exports){
+const Country = require('./Country.js');
+
+class Italy extends Country {
+    constructor(name, description, image, x, y, width, height, locationsMap, religion, wealth){
+        super(name, description, image, x, y, width, height, locationsMap, religion, wealth);
+    }
+
+    static create(locationsMap) {
+        return new Italy(
+            "Italy",
+            "The country Italy",
+            "",
+            0, 0,
+            0, 0,
+            locationsMap,
+            "Roman",
+            Country.RICH
+        )
+    }
+}
+
+module.exports = Italy;
+},{"./Country.js":11}],27:[function(require,module,exports){
+const Entity = require('./Entity.js');
+
+class Location extends Entity {
+    constructor(name, description, image, x, y, width, height, locationsMap) {
+        super(name, description, image, x, y, width, height, Entity.LOCATION);
+        this.locationsMap = locationsMap
+    }
+}
+
+module.exports = Location;
+},{"./Entity.js":19}],28:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Luck extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Luck(
+            "Luck",
+            "How well a person carry things, or hit things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Luck;
+},{"./Attribute.js":2}],29:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Memory extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Memory(
+            "Memory",
+            "ability memory",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Memory;
+},{"./Attribute.js":2}],30:[function(require,module,exports){
+const Person = require('./Person.js');
+
+class Npc extends Person {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance){
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Person.NPC)
+    }
+
+    
+}
+
+module.exports = Npc;
+},{"./Person.js":31}],31:[function(require,module,exports){
+const Interactable = require('./Interactable.js');
+
+class Person extends Interactable {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
+        super(name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
+        this.body = body;
+        this.alliance = alliance;
+        this.personType = personType;
+    }
+}
+
+Person.CHARACTER = 'character';
+Person.NPC = 'npc';
+
+Person.GOOD = 'good';
+Person.LAWFULGOOD = 'lawfulGood'
+Person.EVIL = 'evil';
+
+module.exports = Person;
+},{"./Interactable.js":24}],32:[function(require,module,exports){
+const Entity = require('./Entity.js');
+
+class Plain extends Entity {
+    constructor(name, description, image, x, y, width, height, plainSpace) {
+        super(name, description, image, x, y, width, height, Entity.PLAIN);
+        this.plainSpace = plainSpace;
+    }
+}
+
+module.exports = Plain;
+},{"./Entity.js":19}],33:[function(require,module,exports){
+class Planet {
+    constructor(name, countryList) {
+        this.name = name;
+        this.countryList = countryList;
+    }
+
+    
+}
+
+module.exports = Planet
+},{}],34:[function(require,module,exports){
+const Usable = require('./Usable.js');
+
+class Props extends Usable {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount)
+    }
+}
+
+module.exports = Props;
+},{"./Usable.js":46}],35:[function(require,module,exports){
+const Building = require('./Building.js');
+
+class School extends Building {
+    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
+    }
+
+    static create(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        return new School(
+            name, description,
+            image, x, y,
+            width, height,
+            plainSpace,
+            state, level,
+            upgradePlan,
+            insideImage
+        )
+    }
+
+    static greekSchool() {
+        return new School(
+            "Greek school",
+            "School in the greek faction of earth",
+            "",
+            0, 0,
+            0, 0,
+            [],
+            Building.OPEN,
+            1,
+            null,
+            "" //the image of inside the building
+        )
+    }
+}
+
+module.exports = School;
+},{"./Building.js":4}],36:[function(require,module,exports){
+const Building = require('./Building.js')
+const ShopKeeper = require('./ShopKeeper.js')
+const ShopUpgradePlan = require('./ShopUpgradePlan.js')
+
+class Shop extends Building {
+    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage);
+    }
+
+    static create() {
+        let plan = new ShopUpgradePlan();
+        plan.prepare();
+
+        return new Shop(
+            "Shop",
+            "A shop",
+            "",
+            0, 0,
+            400, 300,
+            [
+                ShopKeeper.create(0, 0)
+            ],
+            Building.CLOSED,
+            1,
+            plan,
+            ""
+        )
+    }
+}
+
+module.exports = Shop
+},{"./Building.js":4,"./ShopKeeper.js":37,"./ShopUpgradePlan.js":38}],37:[function(require,module,exports){
+const Npc = require('./Npc.js')
+const stats = require('./stats.js');
+const inventory = require('./inventory.js');
+const intelligence = require('./intelligence.js');
+const experience = require('./experience.js');
+const Status = require('./Status.js')
+const Body = require('./Body.js')
+
+class ShopKeeper extends Npc {
+    constructor(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, favor) {
+        super(name, description, image, x, y, width, height, stats, inventory, status, body, abilityList, Npc.SHOPKEEPER, favor);
+    }
+
+    static create(x, y) {
+        return new ShopKeeper()
+    }
+}
+
+module.exports = ShopKeeper
+},{"./Body.js":3,"./Npc.js":30,"./Status.js":42,"./experience.js":48,"./intelligence.js":50,"./inventory.js":51,"./stats.js":52}],38:[function(require,module,exports){
+const UpgradePlan = require('./UpgradePlan.js')
+const UpgradeToken = require('./UpgradeToken.js')
+const shop = require('./Shop.js')
+
+class ShopUpgradePlan extends UpgradePlan {
+    constructor() {
+        super()
+    }
+
+    cheaperOne() {
+        function upgrade() {
+            shop.weaponShelf.cheapen(10)
+        }
+        return new UpgradeToken(upgrade,
+        "Cheaper(1)",
+        50)
+    }
+
+    cheaperTwo() {
+        function upgrade() {
+            shop.armorShelf.cheapen(20)
+        }
+        return new UpgradeToken(upgrade,
+        "Cheaper(2)",
+        60)
+    }
+
+    moreGoldOne() {
+        function upgrade() {
+            shop.moreGold(100)
+        }
+        return new UpgradeToken(upgrade,
+        "More Gold(1)",
+        30)
+    }
+
+    moreGoldTwo() {
+        function upgrade() {
+            shop.moreGold(200)
+        }
+        return new UpgradeToken(upgrade,
+        "More Gold(2)",
+        50)
+    }
+
+    moreStocksOne() {
+        function upgrade() {
+            shop.weaponShelf.moreStocks(1)
+            shop.armorShelf.moreStocks(1)
+        }
+        return new UpgradeToken(upgrade,
+        "Greater Stocks(1)",
+        100)
+    }
+
+    moreStocksTwo() {
+        function upgrade(){
+            shop.weaponShelf.moreStocks(2)
+            shop.armorShelf.moreStocks(2)
+        }
+        return new UpgradeToken(upgrade,
+        "Greater Stocks(2)",
+        200)
+    }
+
+    moreStocksThree() {
+        function upgrade() {
+            shop.weaponShelf.moreStocks(3)
+            shop.armorShelf.moreStocks(3)
+        }
+        return new UpgradeToken(upgrade,
+        "Greater Stocks(3)",
+        300)
+    }
+
+    prepare() {
+        const two = this.cheaperOne()
+        const three = this.cheaperTwo()
+        const four = this.moreGoldOne()
+        const five = this.moreGoldTwo()
+        const one = this.moreStocksOne()
+        const six = this.moreStocksTwo()
+        const seven = this.moreStocksThree()
+
+        this.add(one, null)
+        this.add(two, one)
+        this.add(three, two)
+        this.add(four, one)
+        this.add(five, four)
+        this.add(six, five)
+        this.add(seven, three)
+    }
+}
+
+module.exports = ShopUpgradePlan
+},{"./Shop.js":36,"./UpgradePlan.js":44,"./UpgradeToken.js":45}],39:[function(require,module,exports){
+const Building = require('./Building.js');
+const Door = require
+
+class ShoppingMall extends Building {
+    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
+    }
+
+    static create(plainSpace, name) {
+        return new ShoppingMall(
+            name,
+            "", //description
+            "", //image
+            0, 0,
+            0,0,
+            plainSpace,
+            Building.OPEN,
+            1,
+            null,
+            "" //inside image
+        )
+    }
+}
+
+module.exports = ShoppingMall;
+},{"./Building.js":4}],40:[function(require,module,exports){
+const Entity = require('./Entity.js');
+const Status = require('./Status.js');
+
+class State extends Entity {
+    constructor(health, stamina, weight, chi) {
+        super("State", "Character/object's current state", "", 0, 0, 0, 0); //x, y, width, height all 0 at start, but they can be expanded
+        this.status = new Status();
+        this.health = health;
+        this.healthCap = health;
+        this.stamina = stamina;
+        this.staminaCap = stamina;
+        this.weight = weight;
+        this.chi = chi;
+    }
+}
+
+module.exports = State;
+},{"./Entity.js":19,"./Status.js":42}],41:[function(require,module,exports){
+const S = require('./Strength.js');
+const D = require('./Dexterity.js');
+const E = require('./Endurance.js');
+const I = require('./Intelligence.js');
+const C = require('./Constitution.js');
+const M = require('./Memory.js');
+const W = require('./Wits.js');
+const L = require('./Luck.js');
+const F = require('./Faith.js');
+
+
+class Stats {
+    constructor(strength, dexterity, endurance, intelligence, constitution, memory, wits, luck, faith) {
+        this.strength = strength;
+        this.dexterity = dexterity;
+        this.endurance = endurance;
+        this.intelligence = intelligence;
+        this.constitution = constitution;
+        this.memory = memory;
+        this.wits = wits;
+        this.luck = luck;
+        this.faith = faith;
+    }
+
+    static create(str, strM, dex, dexM, end, endM, int, intM, cons, consM, mem, memM, wits, witsM, luck, luckM, faith, faithM) {
+        return new Stats(
+            S.create(str, strM),
+            D.create(dex, dexM),
+            E.create(end, endM),
+            I.create(int, intM),
+            C.create(cons, consM),
+            M.create(mem, memM),
+            W.create(wits, witsM),
+            L.create(luck, luckM),
+            F.create(faith, faithM)
+        )
+    }
+
+}
+
+module.exports = Stats;
+},{"./Constitution.js":9,"./Dexterity.js":13,"./Endurance.js":17,"./Faith.js":20,"./Intelligence.js":23,"./Luck.js":28,"./Memory.js":29,"./Strength.js":43,"./Wits.js":47}],42:[function(require,module,exports){
+class Status {
+    constructor() {
+        this.buff = []
+        this.debuff = []
+    }
+
+    applyEffect(effect) {
+        this[effect.type].push(effect)
+    }
+
+    removeEffect(effect) {
+        for (let x = 0; x < this[effect.type].length; x++) {
+            if (this[effect.type][x].name === effect.name) {
+                this[effect.type].splice(x);
+                break;
+            }
+        }
+    }
+
+
+}
+
+module.exports = Status
+},{}],43:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Strength extends Attribute {
+    constructor(name, description, image, width, height, level, multipler) {
+        super(name, description, image, 0, 0, width, height, level, multipler);
+    }
+
+    static create(level, multiplier) {
+        return new Strength(
+            "Strength",
+            "How well a person carry things, or hit things",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Strength;
+},{"./Attribute.js":2}],44:[function(require,module,exports){
+class UpgradePlan {
+    constructor() {
+        this.first = null
+    }
+
+    add(token, selectedToken, currentToken = this.first, layer = 1) {
+        if (currentToken === null) {
+            this.first = token
+            return
+        }
+        if (selectedToken === currentToken) {
+            currentToken.connect(token)
+            return
+        } else {
+            let idx = 0
+            while (currentToken.hasNext(idx)) {
+                this.add(token, selectedToken, currentToken.hasNext(idx), layer + 1)
+                idx++
+            }
+        }
+    }
+    
+
+    traverse(action = (value, layer) => {
+        console.log(value.name)
+        console.log("On layer:", layer,"\n") }, currentToken = this.first, layer = 1) 
+    {
+        if (currentToken === null) {
+            return
+        }
+        action(currentToken, layer)
+        let idx = 0
+        while (true) {
+            let next = currentToken.hasNext(idx)
+            if (next) {
+                this.traverse(action, next, layer + 1)
+            } else {
+                return
+            }
+            idx += 1
+        }
+    }
+}
+
+module.exports = UpgradePlan
+},{}],45:[function(require,module,exports){
+class UpgradeToken {
+    constructor(upgrade, name, cost) {
+        this.next = []
+        this.upgrade = upgrade
+        this.name = name
+        this.cost = cost
+        this.unlocked = false
+    }
+
+    hasNext(direction) {
+        return this.next[direction]
+    }
+
+    connect(upgrade) {
+        this.next.push(upgrade)
+    }
+}
+
+module.exports = UpgradeToken
+},{}],46:[function(require,module,exports){
+const Interactable = require('./Interactable.js');
+
+class Usable extends Interactable {
+    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(name, description, image, x, y, width, height, Interactable.USABLE, stats, state, inventory, endurance)
+        this.useTime = useTime;
+        this.useAmount = useAmount;
+    }
+}
+
+module.exports = Usable;
+},{"./Interactable.js":24}],47:[function(require,module,exports){
+const Attribute = require('./Attribute.js');
+
+class Wits extends Attribute {
+    constructor(name, description, image, width, height, entityType, level, multiplier) {
+        super(name, description, image, 0, 0, width, height, entityType, level, multiplier);
+    }
+
+    static create(level, multiplier) {
+        return new Wits(
+            "Wits",
+            "reaction speed",
+            "",
+            50, 50,
+            level,
+            multiplier
+        )
+    }
+}
+
+module.exports = Wits;
+},{"./Attribute.js":2}],48:[function(require,module,exports){
+class Experience {
+    constructor() {
+        this.experience = 0;
+        this.cap = 10000;
+    }
+
+    set xp(experience) {
+        this.experience += experience;
+        if (this.xp > this.cap) {
+            this.experience = this.cap;
+        }
+    }
+
+    get xp() {
+        return this.experience;
+    }
+}
+
+module.exports = Experience;
+},{}],49:[function(require,module,exports){
+const Engine = require('./Engine.js');
+const GameState = require('./GameState.js');
+const Earth = require('./Earth.js')
 
 
 const engine = new Engine(
-    new World(
-    0.8,
-    0.8,
-    null,
-    document.body.clientHeight,
-    document.body.clientWidth
-))
+    new GameState(
+        0.8,
+        Earth.create(),
+        document.body.clientHeight,
+        document.body.clientWidth
+    ),
+    20,
+    1
+)
+
+
+
+console.log(engine)
 
 engine.start();
 
 
-},{"./Main.js":19,"./World.js":27}]},{},[28]);
+},{"./Earth.js":16,"./Engine.js":18,"./GameState.js":21}],50:[function(require,module,exports){
+arguments[4][23][0].apply(exports,arguments)
+},{"./Attribute.js":2,"dup":23}],51:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"dup":25}],52:[function(require,module,exports){
+arguments[4][41][0].apply(exports,arguments)
+},{"./Constitution.js":9,"./Dexterity.js":13,"./Endurance.js":17,"./Faith.js":20,"./Intelligence.js":23,"./Luck.js":28,"./Memory.js":29,"./Strength.js":43,"./Wits.js":47,"dup":41}]},{},[49]);

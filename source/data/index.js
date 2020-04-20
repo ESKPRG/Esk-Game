@@ -1,15 +1,22 @@
-const Engine = require('./Main.js');
-const World = require('./World.js')
+const Engine = require('./Engine.js');
+const GameState = require('./GameState.js');
+const Earth = require('./Earth.js')
 
 
 const engine = new Engine(
-    new World(
-    0.8,
-    0.8,
-    null,
-    document.body.clientHeight,
-    document.body.clientWidth
-))
+    new GameState(
+        0.8,
+        Earth.create(),
+        document.body.clientHeight,
+        document.body.clientWidth
+    ),
+    20,
+    1
+)
+
+
+
+console.log(engine)
 
 engine.start();
 
