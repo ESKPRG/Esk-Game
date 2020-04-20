@@ -1,6 +1,8 @@
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
+const DemiGod = require('./DemiGod.js');
+const Brawler = require('./Brawler.js');
 
 let divGameScreen = document.createElement('div');
 divGameScreen.setAttribute('id', 'mainBox')
@@ -18,24 +20,31 @@ class Main extends EE{
         this.on('click', (event) => this.onClick(event.clientX, event.clientY))
     }
 
+    addCharacter(character) {
+        this.gameSpace.addCharacter(character);
+        this.camera.addNewComponent(character);
+    }
+
     keyDown(direction, down) {
         this.gameSpace.keyDown(direction, down);
         this.updateGame()
     }
 
     updateGame() {
-        this.gameSpace.update()
+        this.gameSpace.update(this.camera.onState)
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
     onClick(x, y) {
-        this.gameSpace.clickMove(x, y);
+        this.gameSpace.clickMove(x, y, this.camera.onState);
     }
 
     start() {
-        this.camera.background()
-        this.camera.block()
+        this.addCharacter(DemiGod.create("d", 600, 900))
+        this.addCharacter(DemiGod.create("yigit", 800,
+         800))
+        this.addCharacter(Brawler.create("f", 500, 500))
         setInterval(() => {
             this.updateGame()
         }, 20)

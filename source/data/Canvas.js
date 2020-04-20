@@ -17,8 +17,8 @@ class Canvas {
     }
 
     start() {
-        this.canvas.width = 2000;
-        this.canvas.height = 1000;
+        this.canvas.width = document.body.clientWidth;
+        this.canvas.height = document.body.clientHeight;
         this.canvas.setAttribute('class', 'layer')
         this.canvas.setAttribute('z-index', this.layer)
         this.context = this.canvas.getContext("2d");

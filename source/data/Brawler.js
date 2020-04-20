@@ -4,15 +4,15 @@ const State = require('./State.js');
 const Inventory = require('./Inventory.js');
 const Person = require('./Person.js');
 
-class DemiGod extends Character {
+class Brawler extends Character {
     constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
         super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
     }
 
     static create(name, x, y) {
-        return new DemiGod(
+        return new Brawler(
             name, 
-            "DemiGod",
+            "Brawler",
             "",
             x, y,
             100,
@@ -42,4 +42,4 @@ class DemiGod extends Character {
     }
 }
 
-module.exports = DemiGod;
+module.exports = Brawler;

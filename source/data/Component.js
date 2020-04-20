@@ -15,7 +15,6 @@ class Component {
             this.image = new Image();
             this.image.src = this.color;
             this.image.addEventListener('load', e => {
-                console.log(e)
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             });
         } else {
@@ -24,30 +23,43 @@ class Component {
         }
     }
 
-    update(location) {
-        this.x = location.x;
-        this.y = location.y;
+    update(object) {
+        this.x = object.x;
+        this.y = object.y;
     }
 
-    static block() {
+    static demiGod(character) {
         return new Component(
-            1,
-            300, 300,
-            1,
-            200,
-            200,
+            character.id,
+            character.x, character.y,
+            character.id,
+            character.width,
+            character.height,
             'block',
-            'red'
+            "red"
+        )
+    }
+    static block(character) {
+        return new Component(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            character.width,
+            character.height,
+            'block',
+            'blue'
         )
     }
 
+
     static background() {
         return new Component(
-            1,
+            0,
             0, 0,
             0,
-            2000,
-            1000,
+            document.body.clientWidth,
+            document.body.clientHeight,
             'block',
             'white'
         )
