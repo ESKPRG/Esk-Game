@@ -13,15 +13,16 @@ class GameSpace {
         this.moveLocation = null;
         this.level;
         this.levelIdx = 1;
-        // this.matrix = new Matrix(height, width, [
-        //     {
-        //         x: 500,
-        //         y: 800,
-        //         width: 500,
-        //         height: 500
-        //     }
-        // ], 10)
-        // this.matrix.createMap()
+    }
+
+    setEventTarget(eventTarget) {
+        this.eventTarget = eventTarget;
+    }
+
+    emitEvent(event, eventData) {
+        if (this.eventTarget) {
+            this.eventTarget.emit(event, eventData);
+        }
     }
 
     setLevel(level) {
@@ -120,6 +121,7 @@ class GameSpace {
     }
 
     locationChecker(x, y, object) {
+        console.log(x, y, object)
         return (object.x < x && object.x + object.width > x && object.y < y && object.y + object.height > y)
     }
 
@@ -138,7 +140,23 @@ class GameSpace {
         }
     }
 
-    update() {
+    clickMainScreen(x, y) {
+        let startButton;
+        for (let entity of this.entityList) {
+            if (entity.name === 'startButton') {
+                startButton = entity;
+            }
+        }
+
+        if (this.locationChecker(x, y, startButton)) {
+            console.log("m")
+            this.emitEvent('nextScene');
+        }
+    }
+
+    update(level) {
+        this.level = level;
+        this.entityList = this.level.matrix.get(this.levelIdx).entityList;
         this.level.set(this.levelIdx, this.entityList);
         if (this.player) {
             this.entityListPositionUpdate();
@@ -221,12 +239,7 @@ class GameSpace {
     returnEntityLocations() {
         let final = {};
         for (let idx = 0; idx < this.entityList.length; idx++) {
-            let entity = this.entityList[idx];
-            final[idx] = {
-                id: entity.id,
-                x: entity.x,
-                y: entity.y
-            }
+            final[idx] = this.entityList[idx];
         }
         return final;
     }

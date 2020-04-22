@@ -3,6 +3,7 @@ class Controller {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
         document.body.addEventListener('keydown', (event) => this.keyDownUp('keydown', event.keyCode));
         document.body.addEventListener('keyup', (event) => this.keyDownUp('keyup', event.keyCode));
+        document.addEventListener('contextmenu', event => event.preventDefault());
     }
 
     setEventTarget(eventTarget) {

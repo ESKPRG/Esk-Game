@@ -14,9 +14,10 @@ class Entity {
 
 Entity.INTERACTABLE = 'interactable';
 Entity.MISCELLANEOUS = 'miscellaneous';
+Entity.ICON = 'icon';
 Entity.PLAIN = 'plain';
 Entity.ATTRIBUTE = 'attribute';
 Entity.QUEST = 'quest';
-Entity.LOCATION = 'location'
+Entity.LOCATION = 'location';
 
 module.exports = Entity;

@@ -56,7 +56,6 @@ class Canvas {
 
     add(component) {
         this.componentList.push(component);
-        component.drawImage(this.context);
     }
 
     get() {

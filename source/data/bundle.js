@@ -525,7 +525,7 @@ function functionBindPolyfill(context) {
 
 },{}],2:[function(require,module,exports){
 class AdjacencyMatrix {
-    constructor(heightLength, widthLength, obstacleList, distance) {
+    constructor(widthLength, heightLength, obstacleList, distance) {
         this.heightLength = Math.floor(heightLength / distance);
         this.widthLength = Math.floor(widthLength / distance);
         this.obstacleList = obstacleList;
@@ -837,9 +837,10 @@ Building.OPEN = 'Active'
 Building.CLOSED = 'Inactive'
 
 module.exports = Building
-},{"./Door.js":16,"./Plain.js":33}],6:[function(require,module,exports){
+},{"./Door.js":16,"./Plain.js":34}],6:[function(require,module,exports){
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
+const TextComponent = require('./TextComponent.js');
 
 class Camera {
     constructor(destination) {
@@ -860,7 +861,8 @@ class Camera {
         let component;
         switch(entity.description) {
             case "DemiGod": component = Component.demiGod(entity); break;
-            case "Brawler": component = Component.block(entity);
+            case "Brawler": component = Component.block(entity); break;
+            case "startButton": component = TextComponent.text(entity); break;
         }
 
         let addCheck = true;
@@ -920,7 +922,7 @@ class Camera {
 }
 
 module.exports = Camera;
-},{"./Canvas.js":7,"./Component.js":9}],7:[function(require,module,exports){
+},{"./Canvas.js":7,"./Component.js":9,"./TextComponent.js":48}],7:[function(require,module,exports){
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
@@ -979,7 +981,6 @@ class Canvas {
 
     add(component) {
         this.componentList.push(component);
-        component.drawImage(this.context);
     }
 
     get() {
@@ -1003,9 +1004,9 @@ Character.DEMIGOD = 'demigod';
 
 
 module.exports = Character;
-},{"./Person.js":32}],9:[function(require,module,exports){
+},{"./Person.js":33}],9:[function(require,module,exports){
 class Component {
-    constructor(id, x, y, layer, width, height, type, color) {
+    constructor(id, x, y, layer, width, height, type, color, componentType) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -1014,21 +1015,29 @@ class Component {
         this.height = height;
         this.type = type;
         this.color = color;
+        this.componentType = componentType;
         this.check = true;
     }
 
     drawImage(ctx) {  
-        if (!this.check) { 
-            if (this.type === 'image') {
-                this.image = new Image();
-                this.image.src = this.color;
-                this.image.addEventListener('load', e => {
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                });
-            } else {
+        if (!this.check) {
+            if (this.color) {
+                // this.image = new Image();
+                // this.image.src = this.color;
+                // this.image.addEventListener('load', e => {
+                //     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                // });
+
                 this.check = true;
                 ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.width, this.height)
+                ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height)
+            }
+            if (this.text) {
+                ctx.font = this.font;
+                ctx.fillStyle = "white";
+                ctx.textAlign = this.textAlign;
+                ctx.fillText(this.text, this.x, this.y);
+                this.check = true;
             }
         }
     }
@@ -1059,7 +1068,7 @@ class Component {
             character.width,
             character.height,
             'block',
-            'blue'
+            'black'
         )
     }
 
@@ -1077,6 +1086,10 @@ class Component {
     }
 
 }
+
+Component.IMAGE = 'image';
+Component.BLOCK = 'block';
+Component.TEXT = 'text';
 
 module.exports = Component;
 },{}],10:[function(require,module,exports){
@@ -1106,6 +1119,7 @@ class Controller {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
         document.body.addEventListener('keydown', (event) => this.keyDownUp('keydown', event.keyCode));
         document.body.addEventListener('keyup', (event) => this.keyDownUp('keyup', event.keyCode));
+        document.addEventListener('contextmenu', event => event.preventDefault());
     }
 
     setEventTarget(eventTarget) {
@@ -1147,7 +1161,7 @@ Country.RICH = 'rich';
 
 module.exports = Country;
 
-},{"./Location.js":28}],13:[function(require,module,exports){
+},{"./Location.js":29}],13:[function(require,module,exports){
 const Character = require('./Character.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -1193,7 +1207,7 @@ class DemiGod extends Character {
 }
 
 module.exports = DemiGod;
-},{"./Character.js":8,"./Inventory.js":26,"./Person.js":32,"./State.js":41,"./Stats.js":42}],14:[function(require,module,exports){
+},{"./Character.js":8,"./Inventory.js":27,"./Person.js":33,"./State.js":44,"./Stats.js":45}],14:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Dexterity extends Attribute {
@@ -1235,7 +1249,7 @@ class District extends Location {
 }
 
 module.exports = District;
-},{"./Location.js":28}],16:[function(require,module,exports){
+},{"./Location.js":29}],16:[function(require,module,exports){
 const Props = require('./Props.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -1280,7 +1294,7 @@ class Door extends Props {
 }
 
 module.exports = Door;
-},{"./Inventory.js":26,"./Props.js":35,"./State.js":41,"./Stats.js":42}],17:[function(require,module,exports){
+},{"./Inventory.js":27,"./Props.js":36,"./State.js":44,"./Stats.js":45}],17:[function(require,module,exports){
 const Planet = require('./Planet.js');
 const Greece = require('./Greece.js');
 const Italy = require('./Italy.js')
@@ -1326,7 +1340,7 @@ class Earth extends Planet {
 }
 
 module.exports = Earth
-},{"./District":15,"./Greece.js":23,"./Italy.js":27,"./Planet.js":34,"./School.js":36,"./Shop.js":37,"./ShoppingMall.js":40}],18:[function(require,module,exports){
+},{"./District":15,"./Greece.js":23,"./Italy.js":28,"./Planet.js":35,"./School.js":39,"./Shop.js":40,"./ShoppingMall.js":43}],18:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Endurance extends Attribute {
@@ -1352,6 +1366,9 @@ const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
 const Matrix = require('./AdjacencyMatrix.js');
+const Icon = require('./Icon.js');
+const SceneHandler = require('./SceneHandler.js');
+const Scene = require('./Scene.js');
 
 let divGameScreen = document.createElement('div');
 divGameScreen.setAttribute('id', 'mainBox')
@@ -1365,18 +1382,25 @@ class Engine extends EE{
         this.controller = new Controller();
         this.controller.setEventTarget(this);
         this.gameSpace = gameSpace;
+        this.gameSpace.setEventTarget(this);
         this.refreshRate = refreshRate;
         this.zoom = zoom;
         this.on('key', (event) => this.keyDown(event.direction, event.down));
         this.on('click', (event) => this.onClick(event.clientX, event.clientY));
+        this.on('nextScene', () => this.nextScene())
         this.gameState = {
-            scene: "characterMove"
+            scene: "",
+            entityCount: 1,
+            sceneHandler: new SceneHandler()
         }
     }
 
     addCharacter(character) {
+        let add = character;
+        add.id = this.gameState.entityCount;
         this.gameSpace.addCharacter(character);
         this.camera.addNewComponent(character);
+        this.gameState.entityCount += 1;
     }
 
     createLevel(levelWidth, levelHeight, entityList) {
@@ -1385,7 +1409,7 @@ class Engine extends EE{
         let xSize = Math.ceil(levelWidth / this.gameSpace.width);
         let ySize = Math.ceil(levelHeight / this.gameSpace.height);
 
-        let matrix = new Matrix(ySize, xSize, [], 1);
+        let matrix = new Matrix(xSize, ySize, [], 1);
         matrix.createMap();
 
         for (let entity of entityList) {
@@ -1398,10 +1422,26 @@ class Engine extends EE{
         return matrix;
     }
 
-    addLevel(width, height, entityList) {
-        let level = this.createLevel(width, height, entityList);
-        this.gameSpace.setLevel(level);
+
+    createScene(name, levelWidth, levelHeight, level, func) {
+        console.log(level)
+        return new Scene(name, this.createLevel(levelWidth, levelHeight, level), func)
     }
+
+    addScene(scene) {
+        this.gameState.sceneHandler.addScene(scene);
+    }
+
+    prepareGame(game) {
+        let list = []
+        for (let scene of game) {
+            console.log(scene[4])
+            list.push(this.createScene(scene[0], scene[1], scene[2], scene[3], scene[4])) //name, width, height, list, func
+        }
+        this.addScene(this.gameState.sceneHandler.joinScenes(list))
+    }
+
+    
 
     keyDown(direction, down) {
         this.gameSpace.keyDown(direction, down);
@@ -1409,9 +1449,10 @@ class Engine extends EE{
     }
 
     updateGame() {
-        if (this.gameState.scene === "characterMove") {
-            this.gameSpace.update()
-        }
+        // if (this.gameState.scene === "openWorld") {
+        //     this.gameSpace.update()
+        // }
+        this.gameSpace.update(this.gameState.sceneHandler.getLevel());
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
@@ -1419,19 +1460,35 @@ class Engine extends EE{
 
     onClick(x, y) {
         switch(this.gameState.scene) {
-            case 'characterMove': this.gameSpace.whatDidPlayerClick(x, y);
+            case 'openWorld': this.gameSpace.whatDidPlayerClick(x, y); break;
+            case 'mainScreen': this.gameSpace.clickMainScreen(x, y);
         }
+    }
+
+    nextScene() {
+        this.gameState.sceneHandler.nextScene();
     }
 
     start() {
         setInterval(() => {
             this.updateGame()
         }, this.refreshRate)
+        this.gameState.sceneHandler.runScene();
+    }
+
+    mainScreen() {
+        this.gameState.scene = 'mainScreen';
+        console.log(this.gameState.scene)
+        // this.addCharacter(Icon.startButton(this.gameSpace.width / 2, this.gameSpace.height / 2, 450, 200, 'Start Game'));
+    }
+
+    openWorld() {
+        this.gameState.scene = 'openWorld';
     }
 }
 
 module.exports = Engine;
-},{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":11,"events":1}],20:[function(require,module,exports){
+},{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":11,"./Icon.js":24,"./Scene.js":37,"./SceneHandler.js":38,"events":1}],20:[function(require,module,exports){
 class Entity {
     constructor(name, description, image, x, y, width, height, entityType) {
         this.id = Math.floor((Math.random() * 1000000) + 1);
@@ -1448,10 +1505,11 @@ class Entity {
 
 Entity.INTERACTABLE = 'interactable';
 Entity.MISCELLANEOUS = 'miscellaneous';
+Entity.ICON = 'icon';
 Entity.PLAIN = 'plain';
 Entity.ATTRIBUTE = 'attribute';
 Entity.QUEST = 'quest';
-Entity.LOCATION = 'location'
+Entity.LOCATION = 'location';
 
 module.exports = Entity;
 },{}],21:[function(require,module,exports){
@@ -1491,15 +1549,16 @@ class GameSpace {
         this.moveLocation = null;
         this.level;
         this.levelIdx = 1;
-        // this.matrix = new Matrix(height, width, [
-        //     {
-        //         x: 500,
-        //         y: 800,
-        //         width: 500,
-        //         height: 500
-        //     }
-        // ], 10)
-        // this.matrix.createMap()
+    }
+
+    setEventTarget(eventTarget) {
+        this.eventTarget = eventTarget;
+    }
+
+    emitEvent(event, eventData) {
+        if (this.eventTarget) {
+            this.eventTarget.emit(event, eventData);
+        }
     }
 
     setLevel(level) {
@@ -1598,6 +1657,7 @@ class GameSpace {
     }
 
     locationChecker(x, y, object) {
+        console.log(x, y, object)
         return (object.x < x && object.x + object.width > x && object.y < y && object.y + object.height > y)
     }
 
@@ -1616,7 +1676,23 @@ class GameSpace {
         }
     }
 
-    update() {
+    clickMainScreen(x, y) {
+        let startButton;
+        for (let entity of this.entityList) {
+            if (entity.name === 'startButton') {
+                startButton = entity;
+            }
+        }
+
+        if (this.locationChecker(x, y, startButton)) {
+            console.log("m")
+            this.emitEvent('nextScene');
+        }
+    }
+
+    update(level) {
+        this.level = level;
+        this.entityList = this.level.matrix.get(this.levelIdx).entityList;
         this.level.set(this.levelIdx, this.entityList);
         if (this.player) {
             this.entityListPositionUpdate();
@@ -1699,12 +1775,7 @@ class GameSpace {
     returnEntityLocations() {
         let final = {};
         for (let idx = 0; idx < this.entityList.length; idx++) {
-            let entity = this.entityList[idx];
-            final[idx] = {
-                id: entity.id,
-                x: entity.x,
-                y: entity.y
-            }
+            final[idx] = this.entityList[idx];
         }
         return final;
     }
@@ -1824,6 +1895,66 @@ class Greece extends Country {
 
 module.exports = Greece;
 },{"./Country.js":12}],24:[function(require,module,exports){
+const Entity = require('./Entity.js');
+
+class Icon extends Entity {
+    constructor(name, description, image, x, y, width, height, text, font, fillStyle, textAlign, use) {
+        super(name, description, image, x, y, width, height, Entity.ICON)
+        this.text = text;
+        this.font = font;
+        this.fillStyle = fillStyle;
+        this.textAlign = textAlign;
+
+        this.use = use;
+    }
+
+    setEventTarget(eventTarget) {
+        this.eventTarget = eventTarget;
+    }
+
+    emitEvent(event, eventData) {
+        if (this.eventTarget) {
+            this.eventTarget.emit(event, eventData);
+        }
+    }
+
+    static startButton(x, y, width, height, text) {
+        return new Icon(
+            "startButton",
+            "startButton",
+            "grey",
+            x, y,
+            width, height, 
+            text,
+            "80px Arial",
+            "white",
+            "center",
+            () => {
+                this.emitEvent(this.text, this);
+            }
+        )
+    }
+
+    static blackBox(x, y, width, height) {
+        return new Icon(
+            "blackBox",
+            "",
+            "black",
+            x, y,
+            width, height,
+            null,
+            null,
+            null,
+            null,
+            () => {
+                this.emitEvent(this.text, this)
+            }
+        )
+    }
+}
+
+module.exports = Icon;
+},{"./Entity.js":20}],25:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Intelligence extends Attribute {
@@ -1845,7 +1976,7 @@ class Intelligence extends Attribute {
 }
 
 module.exports = Intelligence;
-},{"./Attribute.js":3}],25:[function(require,module,exports){
+},{"./Attribute.js":3}],26:[function(require,module,exports){
 const Entity = require('./Entity.js')
 
 class Interactable extends Entity {
@@ -1866,7 +1997,7 @@ Interactable.USABLE = 'usable';
 Interactable.PERSON = 'person';
 
 module.exports = Interactable;                                     
-},{"./Entity.js":20}],26:[function(require,module,exports){
+},{"./Entity.js":20}],27:[function(require,module,exports){
 class Inventory {
     constructor() {
         this.list = []
@@ -1889,7 +2020,7 @@ class Inventory {
 }
 
 module.exports = Inventory;
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 const Country = require('./Country.js');
 
 class Italy extends Country {
@@ -1912,7 +2043,7 @@ class Italy extends Country {
 }
 
 module.exports = Italy;
-},{"./Country.js":12}],28:[function(require,module,exports){
+},{"./Country.js":12}],29:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Location extends Entity {
@@ -1923,7 +2054,7 @@ class Location extends Entity {
 }
 
 module.exports = Location;
-},{"./Entity.js":20}],29:[function(require,module,exports){
+},{"./Entity.js":20}],30:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Luck extends Attribute {
@@ -1944,7 +2075,7 @@ class Luck extends Attribute {
 }
 
 module.exports = Luck;
-},{"./Attribute.js":3}],30:[function(require,module,exports){
+},{"./Attribute.js":3}],31:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Memory extends Attribute {
@@ -1965,7 +2096,7 @@ class Memory extends Attribute {
 }
 
 module.exports = Memory;
-},{"./Attribute.js":3}],31:[function(require,module,exports){
+},{"./Attribute.js":3}],32:[function(require,module,exports){
 const Person = require('./Person.js');
 
 class Npc extends Person {
@@ -1977,7 +2108,7 @@ class Npc extends Person {
 }
 
 module.exports = Npc;
-},{"./Person.js":32}],32:[function(require,module,exports){
+},{"./Person.js":33}],33:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Person extends Interactable {
@@ -1997,7 +2128,7 @@ Person.LAWFULGOOD = 'lawfulGood'
 Person.EVIL = 'evil';
 
 module.exports = Person;
-},{"./Interactable.js":25}],33:[function(require,module,exports){
+},{"./Interactable.js":26}],34:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Plain extends Entity {
@@ -2008,7 +2139,7 @@ class Plain extends Entity {
 }
 
 module.exports = Plain;
-},{"./Entity.js":20}],34:[function(require,module,exports){
+},{"./Entity.js":20}],35:[function(require,module,exports){
 class Planet {
     constructor(name, countryList) {
         this.name = name;
@@ -2019,7 +2150,7 @@ class Planet {
 }
 
 module.exports = Planet
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 const Usable = require('./Usable.js');
 
 class Props extends Usable {
@@ -2029,7 +2160,72 @@ class Props extends Usable {
 }
 
 module.exports = Props;
-},{"./Usable.js":47}],36:[function(require,module,exports){
+},{"./Usable.js":51}],37:[function(require,module,exports){
+class Scene {
+    constructor(name, level, run) {
+        this.name = name;
+        this.level = level;
+        this.run = run;
+        this.connectedScenes = []
+    }
+
+    connect(scene) {
+        this.connectedScenes.push(scene);
+    }
+}
+
+module.exports = Scene;
+},{}],38:[function(require,module,exports){
+class SceneHandler {
+    constructor() {
+        this.sceneList = []
+        this.firstScene = null;
+        this.currentScene = null;
+        this.savedScene = null;
+    }
+
+    joinScenes(sceneList) {
+        let firstScene = sceneList[0];
+        this.sceneList.push(sceneList[0]);
+        for (let idx = 0; idx < sceneList.length - 1; idx++) {
+            sceneList[idx].connect(sceneList[idx+1]);
+            this.sceneList.push(sceneList[idx+1]);
+        }
+
+        return firstScene;
+    }
+
+    setScene(scene) {
+        this.currentScene = scene;
+    }
+
+    runScene() {
+        console.log(this.currentScene)
+        this.currentScene.run();
+    }
+
+    nextScene() {
+        this.currentScene = this.currentScene.connectedScenes[0];
+        this.runScene();
+    }
+
+    addScene(scene) {
+        if (!this.firstScene) {
+            this.firstScene = scene;
+            this.currentScene = this.firstScene;
+        } else {
+            this.sceneList.push(scene);
+            this.currentScene.connect(scene);
+        }
+    }
+
+    getLevel() {
+        return this.currentScene.level;
+    }
+}
+
+module.exports = SceneHandler;
+},{}],39:[function(require,module,exports){
 const Building = require('./Building.js');
 
 class School extends Building {
@@ -2066,7 +2262,7 @@ class School extends Building {
 }
 
 module.exports = School;
-},{"./Building.js":5}],37:[function(require,module,exports){
+},{"./Building.js":5}],40:[function(require,module,exports){
 const Building = require('./Building.js')
 const ShopKeeper = require('./ShopKeeper.js')
 const ShopUpgradePlan = require('./ShopUpgradePlan.js')
@@ -2098,7 +2294,7 @@ class Shop extends Building {
 }
 
 module.exports = Shop
-},{"./Building.js":5,"./ShopKeeper.js":38,"./ShopUpgradePlan.js":39}],38:[function(require,module,exports){
+},{"./Building.js":5,"./ShopKeeper.js":41,"./ShopUpgradePlan.js":42}],41:[function(require,module,exports){
 const Npc = require('./Npc.js')
 const stats = require('./stats.js');
 const inventory = require('./inventory.js');
@@ -2118,7 +2314,7 @@ class ShopKeeper extends Npc {
 }
 
 module.exports = ShopKeeper
-},{"./Body.js":4,"./Npc.js":31,"./Status.js":43,"./experience.js":49,"./intelligence.js":51,"./inventory.js":52,"./stats.js":53}],39:[function(require,module,exports){
+},{"./Body.js":4,"./Npc.js":32,"./Status.js":46,"./experience.js":53,"./intelligence.js":55,"./inventory.js":56,"./stats.js":57}],42:[function(require,module,exports){
 const UpgradePlan = require('./UpgradePlan.js')
 const UpgradeToken = require('./UpgradeToken.js')
 const shop = require('./Shop.js')
@@ -2214,7 +2410,7 @@ class ShopUpgradePlan extends UpgradePlan {
 }
 
 module.exports = ShopUpgradePlan
-},{"./Shop.js":37,"./UpgradePlan.js":45,"./UpgradeToken.js":46}],40:[function(require,module,exports){
+},{"./Shop.js":40,"./UpgradePlan.js":49,"./UpgradeToken.js":50}],43:[function(require,module,exports){
 const Building = require('./Building.js');
 const Door = require
 
@@ -2240,7 +2436,7 @@ class ShoppingMall extends Building {
 }
 
 module.exports = ShoppingMall;
-},{"./Building.js":5}],41:[function(require,module,exports){
+},{"./Building.js":5}],44:[function(require,module,exports){
 const Entity = require('./Entity.js');
 const Status = require('./Status.js');
 
@@ -2258,7 +2454,7 @@ class State extends Entity {
 }
 
 module.exports = State;
-},{"./Entity.js":20,"./Status.js":43}],42:[function(require,module,exports){
+},{"./Entity.js":20,"./Status.js":46}],45:[function(require,module,exports){
 const S = require('./Strength.js');
 const D = require('./Dexterity.js');
 const E = require('./Endurance.js');
@@ -2300,7 +2496,7 @@ class Stats {
 }
 
 module.exports = Stats;
-},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":24,"./Luck.js":29,"./Memory.js":30,"./Strength.js":44,"./Wits.js":48}],43:[function(require,module,exports){
+},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":25,"./Luck.js":30,"./Memory.js":31,"./Strength.js":47,"./Wits.js":52}],46:[function(require,module,exports){
 class Status {
     constructor() {
         this.buff = []
@@ -2324,7 +2520,7 @@ class Status {
 }
 
 module.exports = Status
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Strength extends Attribute {
@@ -2345,7 +2541,37 @@ class Strength extends Attribute {
 }
 
 module.exports = Strength;
-},{"./Attribute.js":3}],45:[function(require,module,exports){
+},{"./Attribute.js":3}],48:[function(require,module,exports){
+const Component = require('./Component.js');
+
+class TextComponent extends Component {
+    constructor(id, x, y, layer, width, height, type, color, text, font, fillStyle, textAlign) {
+        super(id, x, y, layer, width, height, type, color);
+        this.text = text;
+        this.font = font;
+        this.fillStyle = fillStyle;
+        this.textAlign = textAlign;
+    }
+
+    static text(object) {
+        return new TextComponent(
+            object.id, object.x,
+            object.y,
+            object.id,
+            object.width,
+            object.height,
+            null,
+            object.image,
+            object.text,
+            object.font,
+            object.fillStyle,
+            object.textAlign
+        )
+    }
+}
+
+module.exports = TextComponent;
+},{"./Component.js":9}],49:[function(require,module,exports){
 class UpgradePlan {
     constructor() {
         this.first = null
@@ -2391,7 +2617,7 @@ class UpgradePlan {
 }
 
 module.exports = UpgradePlan
-},{}],46:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 class UpgradeToken {
     constructor(upgrade, name, cost) {
         this.next = []
@@ -2411,7 +2637,7 @@ class UpgradeToken {
 }
 
 module.exports = UpgradeToken
-},{}],47:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Usable extends Interactable {
@@ -2423,7 +2649,7 @@ class Usable extends Interactable {
 }
 
 module.exports = Usable;
-},{"./Interactable.js":25}],48:[function(require,module,exports){
+},{"./Interactable.js":26}],52:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Wits extends Attribute {
@@ -2444,7 +2670,7 @@ class Wits extends Attribute {
 }
 
 module.exports = Wits;
-},{"./Attribute.js":3}],49:[function(require,module,exports){
+},{"./Attribute.js":3}],53:[function(require,module,exports){
 class Experience {
     constructor() {
         this.experience = 0;
@@ -2464,17 +2690,19 @@ class Experience {
 }
 
 module.exports = Experience;
-},{}],50:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 const Engine = require('./Engine.js');
 const GameState = require('./GameSpace.js');
 const Earth = require('./Earth.js')
 const DemiGod = require('./DemiGod.js');
-const matrix = require('./AdjacencyMatrix.js');
+const Icon = require('./Icon.js');
+
+const earth = Earth.create(); //create the world
 
 const engine = new Engine(
     new GameState(
         0.8,
-        Earth.create(),
+        earth,
         document.body.clientHeight,
         document.body.clientWidth
     ),
@@ -2482,22 +2710,34 @@ const engine = new Engine(
     1
 )
 
-engine.addLevel(3000, 1500, [
-    DemiGod.create("bad", 1000, 500)
-])
+let game = [
+    [
+        "MainScreen", document.body.clientWidth, document.body.clientHeight, [
+            Icon.startButton(engine.gameSpace.width / 2, engine.gameSpace.height / 2, 450, 200, 'Start Game')
+        ], () => { engine.mainScreen() }
+    ],
+    ["Intro", 3000, 1500, [
+        DemiGod.create("bad", 1000, 500),
+        DemiGod.create("ygit", 500, 500),
+        DemiGod.create("Hazar", 100, 100)
+    ], () => { engine.openWorld() }],
+    ["Second chapter", 3000, 1500, [
+        DemiGod.create("yuh", 1000, 500)
+    ], ()=>{}],
+    ["Third Chapter", 6000, 2000, [
+        DemiGod.create("yeah", 500, 500)
+    ], ()=>{}]
+]
 
-engine.addCharacter(DemiGod.create("Hazar", 100, 100))
-engine.addCharacter(DemiGod.create("ygit", 500, 500))
-
-
+engine.prepareGame(game);
 
 engine.start();
 
 
-},{"./AdjacencyMatrix.js":2,"./DemiGod.js":13,"./Earth.js":17,"./Engine.js":19,"./GameSpace.js":22}],51:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"./Attribute.js":3,"dup":24}],52:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],53:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":24,"./Luck.js":29,"./Memory.js":30,"./Strength.js":44,"./Wits.js":48,"dup":42}]},{},[50]);
+},{"./DemiGod.js":13,"./Earth.js":17,"./Engine.js":19,"./GameSpace.js":22,"./Icon.js":24}],55:[function(require,module,exports){
+arguments[4][25][0].apply(exports,arguments)
+},{"./Attribute.js":3,"dup":25}],56:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],57:[function(require,module,exports){
+arguments[4][45][0].apply(exports,arguments)
+},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":25,"./Luck.js":30,"./Memory.js":31,"./Strength.js":47,"./Wits.js":52,"dup":45}]},{},[54]);

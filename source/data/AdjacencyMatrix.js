@@ -1,5 +1,5 @@
 class AdjacencyMatrix {
-    constructor(heightLength, widthLength, obstacleList, distance) {
+    constructor(widthLength, heightLength, obstacleList, distance) {
         this.heightLength = Math.floor(heightLength / distance);
         this.widthLength = Math.floor(widthLength / distance);
         this.obstacleList = obstacleList;

@@ -1,5 +1,5 @@
 class Component {
-    constructor(id, x, y, layer, width, height, type, color) {
+    constructor(id, x, y, layer, width, height, type, color, componentType) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -8,21 +8,29 @@ class Component {
         this.height = height;
         this.type = type;
         this.color = color;
+        this.componentType = componentType;
         this.check = true;
     }
 
     drawImage(ctx) {  
-        if (!this.check) { 
-            if (this.type === 'image') {
-                this.image = new Image();
-                this.image.src = this.color;
-                this.image.addEventListener('load', e => {
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                });
-            } else {
+        if (!this.check) {
+            if (this.color) {
+                // this.image = new Image();
+                // this.image.src = this.color;
+                // this.image.addEventListener('load', e => {
+                //     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                // });
+
                 this.check = true;
                 ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.width, this.height)
+                ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height)
+            }
+            if (this.text) {
+                ctx.font = this.font;
+                ctx.fillStyle = "white";
+                ctx.textAlign = this.textAlign;
+                ctx.fillText(this.text, this.x, this.y);
+                this.check = true;
             }
         }
     }
@@ -53,7 +61,7 @@ class Component {
             character.width,
             character.height,
             'block',
-            'blue'
+            'black'
         )
     }
 
@@ -71,5 +79,9 @@ class Component {
     }
 
 }
+
+Component.IMAGE = 'image';
+Component.BLOCK = 'block';
+Component.TEXT = 'text';
 
 module.exports = Component;
