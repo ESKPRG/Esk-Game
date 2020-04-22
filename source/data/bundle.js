@@ -524,6 +524,224 @@ function functionBindPolyfill(context) {
 }
 
 },{}],2:[function(require,module,exports){
+class AdjacencyMatrix {
+    constructor(heightLength, widthLength, obstacleList, distance) {
+        this.heightLength = Math.floor(heightLength / 10);
+        this.widthLength = Math.floor(widthLength / 10);
+        this.obstacleList = obstacleList;
+        this.distance = distance;
+        this.matrix = new Map();
+        this.alreadyMoved = [];
+    }
+
+    addVertex(v) {
+        this.matrix.set(v, {})
+    }
+
+    addEdge(v, w, direction) {
+        this.matrix.get(v)[direction] = w;
+    } 
+
+    checkObstacle(currentX, currentY, objectList) {
+        for (let object of objectList) {
+            let x = Math.floor(object.x / this.distance);
+            let y = Math.floor(object.y / this.distance);
+            let width = Math.floor(object.width / this.distance);
+            let height = Math.floor(object.height / this.distance);
+
+            if (x < currentX && x + width > currentX && y < currentY && y + height > currentY) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    changeToCoordinates(idx) {
+        let currentWidthLength = 1;
+        let currentHeightLength = 1;
+
+        for (let value = 1; value < (this.heightLength * this.widthLength +1); value++) {
+            if (value === idx) {
+                console.log(currentHeightLength, currentWidthLength)
+                return {
+                    x: currentWidthLength * this.distance,
+                    y: currentHeightLength * this.distance
+                }
+            }
+            
+            if (currentWidthLength < this.widthLength) {
+                currentWidthLength += 1
+            } else {
+                currentWidthLength = 1;
+                currentHeightLength += 1;
+            }
+        }
+    }
+
+    traverse(x1, y1, x2, y2) {
+        x1 = Math.floor(x1 / this.distance);
+        y1 = Math.floor(y1 / this.distance);
+        x2 = Math.floor(x2 / this.distance);
+        y2 = Math.floor(y2 / this.distance);
+
+        let currentWidthLength = 1;
+        let currentHeightLength = 1;
+
+        let final1;
+        let final2;
+        for (let idx = 1; idx < (this.heightLength * this.widthLength + 1); idx++) {
+            if (currentWidthLength === x2 && currentHeightLength === y2) {
+                final2 = {
+                    x: currentWidthLength,
+                    y: currentHeightLength,
+                    idx: idx
+                }
+            }
+
+            if (currentWidthLength === x1 && currentHeightLength === y1) {
+                final1 = {
+                    x: currentWidthLength,
+                    y: currentHeightLength,
+                    idx: idx
+                }
+            }
+
+            if (currentWidthLength < this.widthLength) {
+                currentWidthLength += 1
+            } else {
+                currentWidthLength = 1;
+                currentHeightLength += 1;
+            }
+        }
+
+
+        return this.findShortestRoute(final1, final2);
+        
+    }
+
+    findShortestRoute(current, destination, currentList = []) {
+        if (current.x === destination.x && current.y === destination.y) {
+            console.log(currentList);
+            return currentList
+        }
+
+        console.log(current, destination)
+
+        let currentNumber = current;
+        let destinationNumber = destination;
+        
+        let matrixValue = this.matrix.get(currentNumber.idx)
+
+        if (currentNumber.y > destinationNumber.y) {
+            if (matrixValue.up && !this.alreadyMoved.includes(matrixValue.up)) {
+                this.alreadyMoved.push(matrixValue.up);
+                currentNumber.idx -= this.widthLength;
+                currentList.push(matrixValue.up)
+                currentNumber.y -= 1;
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+
+            if (matrixValue.left && !this.alreadyMoved.includes(matrixValue.left)) {
+                this.alreadyMoved.push(matrixValue.left);
+                currentNumber.idx -= 1;
+                currentNumber.x -= 1;
+                currentList.push(matrixValue.left)
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+
+            if (matrixValue.right && !this.alreadyMoved.includes(matrixValue.right)) {
+                this.alreadyMoved.push(matrixValue.right);
+                currentNumber.idx += 1;
+                currentNumber.x += 1;
+                currentList.push(matrixValue.right)
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+        } else {
+            if (matrixValue.down && !this.alreadyMoved.includes(matrixValue.down)) {
+                this.alreadyMoved.push(matrixValue.down);
+                currentNumber.idx += this.widthLength;
+                currentList.push(matrixValue.down)
+                currentNumber.y += 1;
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+
+            if (matrixValue.left && !this.alreadyMoved.includes(matrixValue.left)) {
+                this.alreadyMoved.push(matrixValue.left);
+                currentNumber.idx -= 1;
+                currentNumber.x -= 1;
+                currentList.push(matrixValue.left)
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+
+            if (matrixValue.right && !this.alreadyMoved.includes(matrixValue.right)) {
+                this.alreadyMoved.push(matrixValue.right);
+                currentNumber.idx += 1;
+                currentNumber.x += 1;
+                currentList.push(matrixValue.right)
+                return this.findShortestRoute(currentNumber, destinationNumber, currentList);
+            }
+        }
+
+        // let up;
+        // let down;
+        // let left;
+        // let right;
+
+        // if (currentNumber.y < destinationNumber.y) { 
+        //     currentNumber.y += 1; 
+        //     down = true;
+        //     currentNumber.idx = (down) ? currentNumber.idx + this.widthLength : currentNumber.idx;
+        // } else if (currentNumber.y > destinationNumber.y) { 
+        //     currentNumber.y -= 1
+        //     up = true;
+        //     currentNumber.idx = (up) ? currentNumber.idx - this.widthLength : currentNumber.idx;
+        // }
+
+        // if (currentNumber.x < destinationNumber.x) { 
+        //     currentNumber.x += 1; 
+        //     right = true;
+        //     currentNumber.idx = (right) ? currentNumber.idx + 1: currentNumber.idx;
+        // } else if (currentNumber.x > destinationNumber.x) { 
+        //     currentNumber.x -= 1
+        //     left = true;
+        //     currentNumber.idx = (left) ? currentNumber.idx - 1: currentNumber.idx;
+        // }
+        
+        // return this.findShortestRoute(currentNumber, destinationNumber, currentList.concat(currentNumber.idx))
+    }
+
+
+
+    createMap() {
+        let currentWidthLength = 1;
+        let currentHeightLength = 1;
+        for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
+            this.addVertex(idx);
+        }
+
+        for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
+            let left = (currentWidthLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - 1 : null;
+            let right = (currentWidthLength < this.widthLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + 1: null;
+            let up = (currentHeightLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - this.widthLength : null;
+            let down = (currentHeightLength < this.heightLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + this.widthLength: null;
+
+            if (left) { this.addEdge(idx, left, "left") }
+            if (right) { this.addEdge(idx, right, "right") }
+            if (up) { this.addEdge(idx, up, "up") }
+            if (down) { this.addEdge(idx, down, "down") }
+
+            if (currentWidthLength < this.widthLength) {
+                currentWidthLength += 1
+            } else {
+                currentWidthLength = 1;
+                currentHeightLength += 1;
+            }
+        }
+    }
+}
+
+module.exports = AdjacencyMatrix;
+},{}],3:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Attribute extends Entity {
@@ -537,7 +755,7 @@ class Attribute extends Entity {
 }
 
 module.exports = Attribute;
-},{"./Entity.js":19}],3:[function(require,module,exports){
+},{"./Entity.js":20}],4:[function(require,module,exports){
 // const Head = require('./Head.js');
 // const Chest = require('./Chest.js');
 // const Legs = require('./Legs.js');
@@ -558,7 +776,7 @@ class Body {
 }
 
 module.exports = Body;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 const Plain = require('./Plain.js');
 const Door = require('./Door.js');
 
@@ -593,7 +811,7 @@ Building.OPEN = 'Active'
 Building.CLOSED = 'Inactive'
 
 module.exports = Building
-},{"./Door.js":15,"./Plain.js":32}],5:[function(require,module,exports){
+},{"./Door.js":16,"./Plain.js":33}],6:[function(require,module,exports){
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
 
@@ -653,7 +871,7 @@ class Camera {
 }
 
 module.exports = Camera;
-},{"./Canvas.js":6,"./Component.js":8}],6:[function(require,module,exports){
+},{"./Canvas.js":7,"./Component.js":9}],7:[function(require,module,exports){
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
@@ -700,7 +918,7 @@ class Canvas {
 }
 
 module.exports = Canvas;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const Person = require('./Person.js');
 
 class Character extends Person {
@@ -715,7 +933,7 @@ Character.DEMIGOD = 'demigod';
 
 
 module.exports = Character;
-},{"./Person.js":31}],8:[function(require,module,exports){
+},{"./Person.js":32}],9:[function(require,module,exports){
 class Component {
     constructor(id, x, y, layer, width, height, type, color) {
         this.id = id;
@@ -786,7 +1004,7 @@ class Component {
 }
 
 module.exports = Component;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Constitution extends Attribute {
@@ -807,7 +1025,7 @@ class Constitution extends Attribute {
 }
 
 module.exports = Constitution;
-},{"./Attribute.js":2}],10:[function(require,module,exports){
+},{"./Attribute.js":3}],11:[function(require,module,exports){
 class Controller {
     constructor() {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
@@ -836,7 +1054,7 @@ class Controller {
 }
 
 module.exports = Controller;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 const Location = require('./Location.js')
 
 class Country extends Location {
@@ -854,7 +1072,7 @@ Country.RICH = 'rich';
 
 module.exports = Country;
 
-},{"./Location.js":27}],12:[function(require,module,exports){
+},{"./Location.js":28}],13:[function(require,module,exports){
 const Character = require('./Character.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -900,7 +1118,7 @@ class DemiGod extends Character {
 }
 
 module.exports = DemiGod;
-},{"./Character.js":7,"./Inventory.js":25,"./Person.js":31,"./State.js":40,"./Stats.js":41}],13:[function(require,module,exports){
+},{"./Character.js":8,"./Inventory.js":26,"./Person.js":32,"./State.js":41,"./Stats.js":42}],14:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Dexterity extends Attribute {
@@ -921,7 +1139,7 @@ class Dexterity extends Attribute {
 }
 
 module.exports = Dexterity;
-},{"./Attribute.js":2}],14:[function(require,module,exports){
+},{"./Attribute.js":3}],15:[function(require,module,exports){
 const Location = require('./Location.js');
 
 class District extends Location {
@@ -942,7 +1160,7 @@ class District extends Location {
 }
 
 module.exports = District;
-},{"./Location.js":27}],15:[function(require,module,exports){
+},{"./Location.js":28}],16:[function(require,module,exports){
 const Props = require('./Props.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -987,7 +1205,7 @@ class Door extends Props {
 }
 
 module.exports = Door;
-},{"./Inventory.js":25,"./Props.js":34,"./State.js":40,"./Stats.js":41}],16:[function(require,module,exports){
+},{"./Inventory.js":26,"./Props.js":35,"./State.js":41,"./Stats.js":42}],17:[function(require,module,exports){
 const Planet = require('./Planet.js');
 const Greece = require('./Greece.js');
 const Italy = require('./Italy.js')
@@ -1033,7 +1251,7 @@ class Earth extends Planet {
 }
 
 module.exports = Earth
-},{"./District":14,"./Greece.js":22,"./Italy.js":26,"./Planet.js":33,"./School.js":35,"./Shop.js":36,"./ShoppingMall.js":39}],17:[function(require,module,exports){
+},{"./District":15,"./Greece.js":23,"./Italy.js":27,"./Planet.js":34,"./School.js":36,"./Shop.js":37,"./ShoppingMall.js":40}],18:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Endurance extends Attribute {
@@ -1054,7 +1272,7 @@ class Endurance extends Attribute {
 }
 
 module.exports = Endurance;
-},{"./Attribute.js":2}],18:[function(require,module,exports){
+},{"./Attribute.js":3}],19:[function(require,module,exports){
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
@@ -1076,7 +1294,7 @@ class Engine extends EE{
         this.on('key', (event) => this.keyDown(event.direction, event.down));
         this.on('click', (event) => this.onClick(event.clientX, event.clientY));
         this.gameState = {
-            scene: "mainScreen"
+            scene: "characterMove"
         }
     }
 
@@ -1091,15 +1309,18 @@ class Engine extends EE{
     }
 
     updateGame() {
-        if (this.gameState.scene === "inGame") {
+        if (this.gameState.scene === "characterMove") {
             this.gameSpace.update()
         }
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
+
     onClick(x, y) {
-        this.gameSpace.clickMove(x, y);
+        switch(this.gameState.scene) {
+            case 'characterMove': this.gameSpace.whatDidPlayerClick(x, y);
+        }
     }
 
     start() {
@@ -1110,7 +1331,7 @@ class Engine extends EE{
 }
 
 module.exports = Engine;
-},{"./Camera.js":5,"./Controller.js":10,"events":1}],19:[function(require,module,exports){
+},{"./Camera.js":6,"./Controller.js":11,"events":1}],20:[function(require,module,exports){
 class Entity {
     constructor(name, description, image, x, y, width, height, entityType) {
         this.id = Math.floor((Math.random() * 1000000) + 1);
@@ -1133,7 +1354,7 @@ Entity.QUEST = 'quest';
 Entity.LOCATION = 'location'
 
 module.exports = Entity;
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Faith extends Attribute {
@@ -1154,10 +1375,11 @@ class Faith extends Attribute {
 }
 
 module.exports = Faith;
-},{"./Attribute.js":2}],21:[function(require,module,exports){
+},{"./Attribute.js":3}],22:[function(require,module,exports){
 const DemiGod = require('./DemiGod.js');
+const Matrix = require('./AdjacencyMatrix.js');
 
-class GameState {
+class GameSpace {
     constructor(gravity, world, height, width) {
         this.gravity = gravity;
         this.world = world;
@@ -1166,6 +1388,16 @@ class GameState {
         this.entityList = []
         this.player = null;
         this.cameraState = false;
+        this.moveLocation = null;
+        // this.matrix = new Matrix(height, width, [
+        //     {
+        //         x: 500,
+        //         y: 800,
+        //         width: 500,
+        //         height: 500
+        //     }
+        // ], 10)
+        // this.matrix.createMap()
     }
 
     addCharacter(character) {
@@ -1191,25 +1423,61 @@ class GameState {
         }
     }
 
+    locationChecker(x, y, object) {
+        return (object.x < x && object.x + object.width > x && object.y < y && object.y + object.height > y)
+    }
+
+    whatDidPlayerClick(x, y) {
+        let walkCheck = true;
+        for (let entity of this.entityList) {
+            if (this.locationChecker(x, y, entity)) {
+                //interact with item;
+                this.player = entity;
+                walkCheck = false;
+            }
+        }
+
+        if (walkCheck) {
+            this.clickMove(x, y);
+        }
+    }
+
     update() {
-        this.player = this.entityList[0];
-        if (this.cameraState) {
-            this.player.x = document.body.clientWidth / 2;
-            this.player.y = document.body.clientHeight / 2;
-        }
-        this.entityListPositionUpdate();
-        let playerInEntity;
-        for (let entity of this.entityList) {
-            if (entity === this.player) {
-                playerInEntity = entity;
+        if (this.player) {
+            if (this.cameraState) {
+                this.player.x = document.body.clientWidth / 2;
+                this.player.y = document.body.clientHeight / 2;
+            }
+            this.entityListPositionUpdate();
+            let playerInEntity;
+            for (let entity of this.entityList) {
+                if (entity === this.player) {
+                    playerInEntity = entity;
+                }
+            }
+            this.collideObject(playerInEntity)
+            for (let entity of this.entityList) {
+                if (entity !== playerInEntity) {
+                    this.collisionCheck(playerInEntity, entity)
+                }
             }
         }
-        this.collideObject(playerInEntity)
-        for (let entity of this.entityList) {
-            if (entity !== playerInEntity) {
-                this.collisionCheck(playerInEntity, entity)
-            }
-        }
+        // if (this.player && this.moveLocation) {
+        //     let playerInEntity;
+        //     for (let entity of this.entityList) {
+        //         if (entity === this.player) { playerInEntity = entity; }
+        //     }
+        //     if (this.player.moveIdx < this.moveLocation.length) {
+        //         let coordinates = this.matrix.changeToCoordinates(this.moveLocation[this.player.moveIdx]);
+        //         playerInEntity.x = coordinates.x;
+        //         playerInEntity.y = coordinates.y;
+        //         this.player.moveIdx += 1;
+        //     } else {
+        //         this.moveLocation = null;
+        //         this.player.moveIdx = 0;
+        //     }
+        //     this.collideObject(playerInEntity);
+        // }
     }
 
     entityListPositionUpdate() {
@@ -1276,58 +1544,64 @@ class GameState {
     }
 
     clickMove(x, y) {
-        if (!this.cameraState) {
-            let playerInEntity;
-                for (let entity of this.entityList) {
-                    if (entity === this.player) {
-                        playerInEntity = entity;
-                    }
-                }
-
-            playerInEntity.currentSteps = 1;
-            playerInEntity.start = {};
-            playerInEntity.start.x = playerInEntity.x;
-            playerInEntity.start.y = playerInEntity.y;
-            x -= playerInEntity.width / 2;
-            y -= playerInEntity.height / 2;
-
-            let xabs = Math.abs(x - playerInEntity.x);
-            let yabs = Math.abs(y - playerInEntity.y);
-            let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-            playerInEntity.steps = Math.floor(length) / 25;
-            playerInEntity.moving = true;
-            playerInEntity.direction = {};
-            playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
-            console.log(playerInEntity.steps)
-            playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
-            playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
-        } else {
-            for (let entity of this.entityList) {
+        // if (this.player) {
+        //     this.moveLocation = this.matrix.traverse(this.player.x, this.player.y, x, y);
+        //     this.player.moveIdx = 0;
+        // }
+        if (this.player) {
+            if (!this.cameraState) {
                 let playerInEntity;
-                for (let entity of this.entityList) {
-                    if (entity === this.player) {
-                        playerInEntity = entity;
+                    for (let entity of this.entityList) {
+                        if (entity === this.player) {
+                            playerInEntity = entity;
+                        }
                     }
-                }
-                if (entity !== this.player) {
-                    entity.currentSteps = 1;
-                    entity.start = {}
-                    entity.start.x = entity.x;
-                    entity.start.y = entity.y;
-                    let xchange = playerInEntity.x - x;
-                    let ychange = playerInEntity.y - y;
-                    x = entity.x + xchange + playerInEntity.width / 2;
-                    y = entity.y + ychange + playerInEntity.height / 2;
 
-                    let xabs = Math.abs(entity.start.x + x);
-                    let yabs = Math.abs(entity.start.y + y);
-                    let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-                    entity.steps = Math.floor(length) / 25;
-                    entity.moving = true;
-                    entity.direction = {};
-                    entity.direction.x = (entity.x - x) / entity.steps;
-                    entity.direction.y = (entity.y - y) / entity.steps;
-                    playerInEntity.moving = true;
+                playerInEntity.currentSteps = 1;
+                playerInEntity.start = {};
+                playerInEntity.start.x = playerInEntity.x;
+                playerInEntity.start.y = playerInEntity.y;
+                x -= playerInEntity.width / 2;
+                y -= playerInEntity.height / 2;
+
+                let xabs = Math.abs(x - playerInEntity.x);
+                let yabs = Math.abs(y - playerInEntity.y);
+                let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+                playerInEntity.steps = Math.floor(length) / 25;
+                playerInEntity.moving = true;
+                playerInEntity.direction = {};
+                playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
+                console.log(playerInEntity.steps)
+                playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
+                playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
+            } else {
+                for (let entity of this.entityList) {
+                    let playerInEntity;
+                    for (let entity of this.entityList) {
+                        if (entity === this.player) {
+                            playerInEntity = entity;
+                        }
+                    }
+                    if (entity !== this.player) {
+                        entity.currentSteps = 1;
+                        entity.start = {}
+                        entity.start.x = entity.x;
+                        entity.start.y = entity.y;
+                        let xchange = playerInEntity.x - x;
+                        let ychange = playerInEntity.y - y;
+                        x = entity.x + xchange + playerInEntity.width / 2;
+                        y = entity.y + ychange + playerInEntity.height / 2;
+
+                        let xabs = Math.abs(entity.start.x + x);
+                        let yabs = Math.abs(entity.start.y + y);
+                        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+                        entity.steps = Math.floor(length) / 25;
+                        entity.moving = true;
+                        entity.direction = {};
+                        entity.direction.x = (entity.x - x) / entity.steps;
+                        entity.direction.y = (entity.y - y) / entity.steps;
+                        playerInEntity.moving = true;
+                    }
                 }
             }
         }
@@ -1349,8 +1623,8 @@ class GameState {
 }
 
 
-module.exports = GameState;
-},{"./DemiGod.js":12}],22:[function(require,module,exports){
+module.exports = GameSpace;
+},{"./AdjacencyMatrix.js":2,"./DemiGod.js":13}],23:[function(require,module,exports){
 const Country = require('./Country.js');
 
 class Greece extends Country {
@@ -1373,7 +1647,7 @@ class Greece extends Country {
 }
 
 module.exports = Greece;
-},{"./Country.js":11}],23:[function(require,module,exports){
+},{"./Country.js":12}],24:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Intelligence extends Attribute {
@@ -1395,7 +1669,7 @@ class Intelligence extends Attribute {
 }
 
 module.exports = Intelligence;
-},{"./Attribute.js":2}],24:[function(require,module,exports){
+},{"./Attribute.js":3}],25:[function(require,module,exports){
 const Entity = require('./Entity.js')
 
 class Interactable extends Entity {
@@ -1416,7 +1690,7 @@ Interactable.USABLE = 'usable';
 Interactable.PERSON = 'person';
 
 module.exports = Interactable;                                     
-},{"./Entity.js":19}],25:[function(require,module,exports){
+},{"./Entity.js":20}],26:[function(require,module,exports){
 class Inventory {
     constructor() {
         this.list = []
@@ -1439,7 +1713,7 @@ class Inventory {
 }
 
 module.exports = Inventory;
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 const Country = require('./Country.js');
 
 class Italy extends Country {
@@ -1462,7 +1736,7 @@ class Italy extends Country {
 }
 
 module.exports = Italy;
-},{"./Country.js":11}],27:[function(require,module,exports){
+},{"./Country.js":12}],28:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Location extends Entity {
@@ -1473,7 +1747,7 @@ class Location extends Entity {
 }
 
 module.exports = Location;
-},{"./Entity.js":19}],28:[function(require,module,exports){
+},{"./Entity.js":20}],29:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Luck extends Attribute {
@@ -1494,7 +1768,7 @@ class Luck extends Attribute {
 }
 
 module.exports = Luck;
-},{"./Attribute.js":2}],29:[function(require,module,exports){
+},{"./Attribute.js":3}],30:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Memory extends Attribute {
@@ -1515,7 +1789,7 @@ class Memory extends Attribute {
 }
 
 module.exports = Memory;
-},{"./Attribute.js":2}],30:[function(require,module,exports){
+},{"./Attribute.js":3}],31:[function(require,module,exports){
 const Person = require('./Person.js');
 
 class Npc extends Person {
@@ -1527,7 +1801,7 @@ class Npc extends Person {
 }
 
 module.exports = Npc;
-},{"./Person.js":31}],31:[function(require,module,exports){
+},{"./Person.js":32}],32:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Person extends Interactable {
@@ -1547,7 +1821,7 @@ Person.LAWFULGOOD = 'lawfulGood'
 Person.EVIL = 'evil';
 
 module.exports = Person;
-},{"./Interactable.js":24}],32:[function(require,module,exports){
+},{"./Interactable.js":25}],33:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Plain extends Entity {
@@ -1558,7 +1832,7 @@ class Plain extends Entity {
 }
 
 module.exports = Plain;
-},{"./Entity.js":19}],33:[function(require,module,exports){
+},{"./Entity.js":20}],34:[function(require,module,exports){
 class Planet {
     constructor(name, countryList) {
         this.name = name;
@@ -1569,7 +1843,7 @@ class Planet {
 }
 
 module.exports = Planet
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 const Usable = require('./Usable.js');
 
 class Props extends Usable {
@@ -1579,7 +1853,7 @@ class Props extends Usable {
 }
 
 module.exports = Props;
-},{"./Usable.js":46}],35:[function(require,module,exports){
+},{"./Usable.js":47}],36:[function(require,module,exports){
 const Building = require('./Building.js');
 
 class School extends Building {
@@ -1616,7 +1890,7 @@ class School extends Building {
 }
 
 module.exports = School;
-},{"./Building.js":4}],36:[function(require,module,exports){
+},{"./Building.js":5}],37:[function(require,module,exports){
 const Building = require('./Building.js')
 const ShopKeeper = require('./ShopKeeper.js')
 const ShopUpgradePlan = require('./ShopUpgradePlan.js')
@@ -1648,7 +1922,7 @@ class Shop extends Building {
 }
 
 module.exports = Shop
-},{"./Building.js":4,"./ShopKeeper.js":37,"./ShopUpgradePlan.js":38}],37:[function(require,module,exports){
+},{"./Building.js":5,"./ShopKeeper.js":38,"./ShopUpgradePlan.js":39}],38:[function(require,module,exports){
 const Npc = require('./Npc.js')
 const stats = require('./stats.js');
 const inventory = require('./inventory.js');
@@ -1668,7 +1942,7 @@ class ShopKeeper extends Npc {
 }
 
 module.exports = ShopKeeper
-},{"./Body.js":3,"./Npc.js":30,"./Status.js":42,"./experience.js":48,"./intelligence.js":50,"./inventory.js":51,"./stats.js":52}],38:[function(require,module,exports){
+},{"./Body.js":4,"./Npc.js":31,"./Status.js":43,"./experience.js":49,"./intelligence.js":51,"./inventory.js":52,"./stats.js":53}],39:[function(require,module,exports){
 const UpgradePlan = require('./UpgradePlan.js')
 const UpgradeToken = require('./UpgradeToken.js')
 const shop = require('./Shop.js')
@@ -1764,7 +2038,7 @@ class ShopUpgradePlan extends UpgradePlan {
 }
 
 module.exports = ShopUpgradePlan
-},{"./Shop.js":36,"./UpgradePlan.js":44,"./UpgradeToken.js":45}],39:[function(require,module,exports){
+},{"./Shop.js":37,"./UpgradePlan.js":45,"./UpgradeToken.js":46}],40:[function(require,module,exports){
 const Building = require('./Building.js');
 const Door = require
 
@@ -1790,7 +2064,7 @@ class ShoppingMall extends Building {
 }
 
 module.exports = ShoppingMall;
-},{"./Building.js":4}],40:[function(require,module,exports){
+},{"./Building.js":5}],41:[function(require,module,exports){
 const Entity = require('./Entity.js');
 const Status = require('./Status.js');
 
@@ -1808,7 +2082,7 @@ class State extends Entity {
 }
 
 module.exports = State;
-},{"./Entity.js":19,"./Status.js":42}],41:[function(require,module,exports){
+},{"./Entity.js":20,"./Status.js":43}],42:[function(require,module,exports){
 const S = require('./Strength.js');
 const D = require('./Dexterity.js');
 const E = require('./Endurance.js');
@@ -1850,7 +2124,7 @@ class Stats {
 }
 
 module.exports = Stats;
-},{"./Constitution.js":9,"./Dexterity.js":13,"./Endurance.js":17,"./Faith.js":20,"./Intelligence.js":23,"./Luck.js":28,"./Memory.js":29,"./Strength.js":43,"./Wits.js":47}],42:[function(require,module,exports){
+},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":24,"./Luck.js":29,"./Memory.js":30,"./Strength.js":44,"./Wits.js":48}],43:[function(require,module,exports){
 class Status {
     constructor() {
         this.buff = []
@@ -1874,7 +2148,7 @@ class Status {
 }
 
 module.exports = Status
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Strength extends Attribute {
@@ -1895,7 +2169,7 @@ class Strength extends Attribute {
 }
 
 module.exports = Strength;
-},{"./Attribute.js":2}],44:[function(require,module,exports){
+},{"./Attribute.js":3}],45:[function(require,module,exports){
 class UpgradePlan {
     constructor() {
         this.first = null
@@ -1941,7 +2215,7 @@ class UpgradePlan {
 }
 
 module.exports = UpgradePlan
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 class UpgradeToken {
     constructor(upgrade, name, cost) {
         this.next = []
@@ -1961,7 +2235,7 @@ class UpgradeToken {
 }
 
 module.exports = UpgradeToken
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Usable extends Interactable {
@@ -1973,7 +2247,7 @@ class Usable extends Interactable {
 }
 
 module.exports = Usable;
-},{"./Interactable.js":24}],47:[function(require,module,exports){
+},{"./Interactable.js":25}],48:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Wits extends Attribute {
@@ -1994,7 +2268,7 @@ class Wits extends Attribute {
 }
 
 module.exports = Wits;
-},{"./Attribute.js":2}],48:[function(require,module,exports){
+},{"./Attribute.js":3}],49:[function(require,module,exports){
 class Experience {
     constructor() {
         this.experience = 0;
@@ -2014,11 +2288,12 @@ class Experience {
 }
 
 module.exports = Experience;
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 const Engine = require('./Engine.js');
-const GameState = require('./GameState.js');
+const GameState = require('./GameSpace.js');
 const Earth = require('./Earth.js')
-
+const DemiGod = require('./DemiGod.js');
+const matrix = require('./AdjacencyMatrix.js');
 
 const engine = new Engine(
     new GameState(
@@ -2031,17 +2306,16 @@ const engine = new Engine(
     1
 )
 
+engine.addCharacter(DemiGod.create("Hazar", 100, 100))
 
-
-console.log(engine)
 
 engine.start();
 
 
-},{"./Earth.js":16,"./Engine.js":18,"./GameState.js":21}],50:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"./Attribute.js":2,"dup":23}],51:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],52:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"./Constitution.js":9,"./Dexterity.js":13,"./Endurance.js":17,"./Faith.js":20,"./Intelligence.js":23,"./Luck.js":28,"./Memory.js":29,"./Strength.js":43,"./Wits.js":47,"dup":41}]},{},[49]);
+},{"./AdjacencyMatrix.js":2,"./DemiGod.js":13,"./Earth.js":17,"./Engine.js":19,"./GameSpace.js":22}],51:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"./Attribute.js":3,"dup":24}],52:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"dup":26}],53:[function(require,module,exports){
+arguments[4][42][0].apply(exports,arguments)
+},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":24,"./Luck.js":29,"./Memory.js":30,"./Strength.js":44,"./Wits.js":48,"dup":42}]},{},[50]);

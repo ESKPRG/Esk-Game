@@ -1,7 +1,8 @@
 const Engine = require('./Engine.js');
-const GameState = require('./GameState.js');
+const GameState = require('./GameSpace.js');
 const Earth = require('./Earth.js')
-
+const DemiGod = require('./DemiGod.js');
+const matrix = require('./AdjacencyMatrix.js');
 
 const engine = new Engine(
     new GameState(
@@ -14,9 +15,8 @@ const engine = new Engine(
     1
 )
 
+engine.addCharacter(DemiGod.create("Hazar", 100, 100))
 
-
-console.log(engine)
 
 engine.start();
 

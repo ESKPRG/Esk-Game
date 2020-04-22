@@ -19,7 +19,7 @@ class Engine extends EE{
         this.on('key', (event) => this.keyDown(event.direction, event.down));
         this.on('click', (event) => this.onClick(event.clientX, event.clientY));
         this.gameState = {
-            scene: "mainScreen"
+            scene: "characterMove"
         }
     }
 
@@ -34,15 +34,18 @@ class Engine extends EE{
     }
 
     updateGame() {
-        if (this.gameState.scene === "inGame") {
+        if (this.gameState.scene === "characterMove") {
             this.gameSpace.update()
         }
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
+
     onClick(x, y) {
-        this.gameSpace.clickMove(x, y);
+        switch(this.gameState.scene) {
+            case 'characterMove': this.gameSpace.whatDidPlayerClick(x, y);
+        }
     }
 
     start() {
