@@ -1,6 +1,7 @@
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
+const Matrix = require('./AdjacencyMatrix.js');
 
 let divGameScreen = document.createElement('div');
 divGameScreen.setAttribute('id', 'mainBox')
@@ -26,6 +27,30 @@ class Engine extends EE{
     addCharacter(character) {
         this.gameSpace.addCharacter(character);
         this.camera.addNewComponent(character);
+    }
+
+    createLevel(levelWidth, levelHeight, entityList) {
+        let entityXSize;
+        let entityYSize;
+        let xSize = Math.ceil(levelWidth / this.gameSpace.width);
+        let ySize = Math.ceil(levelHeight / this.gameSpace.height);
+
+        let matrix = new Matrix(ySize, xSize, [], 1);
+        matrix.createMap();
+
+        for (let entity of entityList) {
+            entityXSize = Math.ceil(entity.x / this.gameSpace.width);
+            entityYSize = Math.ceil(entity.y / this.gameSpace.height);
+
+            matrix.addEntity(entityXSize, entityYSize, entity)
+        }
+
+        return matrix;
+    }
+
+    addLevel(width, height, entityList) {
+        let level = this.createLevel(width, height, entityList);
+        this.gameSpace.setLevel(level);
     }
 
     keyDown(direction, down) {

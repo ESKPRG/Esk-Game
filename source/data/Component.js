@@ -8,24 +8,29 @@ class Component {
         this.height = height;
         this.type = type;
         this.color = color;
+        this.check = true;
     }
 
-    drawImage(ctx) {   
-        if (this.type === 'image') {
-            this.image = new Image();
-            this.image.src = this.color;
-            this.image.addEventListener('load', e => {
-                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            });
-        } else {
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.width, this.height)
+    drawImage(ctx) {  
+        if (!this.check) { 
+            if (this.type === 'image') {
+                this.image = new Image();
+                this.image.src = this.color;
+                this.image.addEventListener('load', e => {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                });
+            } else {
+                this.check = true;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+            }
         }
     }
 
     update(object) {
         this.x = object.x;
         this.y = object.y;
+        this.check = false;
     }
 
     static demiGod(character) {

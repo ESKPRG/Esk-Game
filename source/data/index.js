@@ -15,7 +15,13 @@ const engine = new Engine(
     1
 )
 
+engine.addLevel(3000, 1500, [
+    DemiGod.create("bad", 1000, 500)
+])
+
 engine.addCharacter(DemiGod.create("Hazar", 100, 100))
+engine.addCharacter(DemiGod.create("ygit", 500, 500))
+
 
 
 engine.start();

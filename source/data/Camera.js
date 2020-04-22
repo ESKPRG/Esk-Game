@@ -22,18 +22,41 @@ class Camera {
             case "DemiGod": component = Component.demiGod(entity); break;
             case "Brawler": component = Component.block(entity);
         }
-        let canvas = this.createNewLayer(component.layer);
-        canvas.set(component);
+
+        let addCheck = true;
+
+        for (let canvas of this.canvasList) {
+            if (canvas.layer === component.layer){
+                canvas.add(component);
+                addCheck = false;
+            }
+        }
+
+        if (addCheck) {
+            let canvas = this.createNewLayer(component.layer);
+            canvas.add(component);
+        }
+    }
+
+    updateCanvasList() {
+        for (let canvas of this.canvasList) {
+            canvas.canvasList = [];
+        }
     }
 
     updateLocations(locationObject) {
         for (let object of Object.values(locationObject)) {
+            let check = false;
             for (let canvas of this.canvasList) {
                 if (canvas.layer !== 0) {
                     if (object.id === canvas.layer) {
-                        canvas.component.update(object)
+                        check = true;
+                        canvas.update(object)
                     }
                 }
+            }
+            if (!check) {
+                this.addNewComponent(object);
             }
         }
     }

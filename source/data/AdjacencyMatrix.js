@@ -1,7 +1,7 @@
 class AdjacencyMatrix {
     constructor(heightLength, widthLength, obstacleList, distance) {
-        this.heightLength = Math.floor(heightLength / 10);
-        this.widthLength = Math.floor(widthLength / 10);
+        this.heightLength = Math.floor(heightLength / distance);
+        this.widthLength = Math.floor(widthLength / distance);
         this.obstacleList = obstacleList;
         this.distance = distance;
         this.matrix = new Map();
@@ -184,7 +184,34 @@ class AdjacencyMatrix {
         // return this.findShortestRoute(currentNumber, destinationNumber, currentList.concat(currentNumber.idx))
     }
 
+    addEntity(x, y, entity) {
+        let currentWidthLength = 1;
+        let currentHeightLength = 1;
+        for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
+            if (!this.get(idx)['entityList']) {
+                this.get(idx)['entityList'] = [];
+            }
+            if (currentWidthLength === x && currentHeightLength === y) {
+                this.matrix.get(idx)['entityList'].push(entity);
+            }
 
+            if (currentWidthLength < this.widthLength) {
+                currentWidthLength += 1
+            } else {
+                currentWidthLength = 1;
+                currentHeightLength += 1;
+            }
+        }
+    }
+
+    get(idx) {
+        return this.matrix.get(idx);
+    }
+
+    set(idx, entityList) {
+        this.matrix.get(idx).entityList = entityList;
+    }
+    
 
     createMap() {
         let currentWidthLength = 1;
@@ -192,12 +219,11 @@ class AdjacencyMatrix {
         for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
             this.addVertex(idx);
         }
-
         for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
-            let left = (currentWidthLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - 1 : null;
-            let right = (currentWidthLength < this.widthLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + 1: null;
-            let up = (currentHeightLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - this.widthLength : null;
-            let down = (currentHeightLength < this.heightLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + this.widthLength: null;
+            let left = (currentWidthLength > 1) ? idx - 1 : null;
+            let right = (currentWidthLength < this.widthLength) ? idx + 1: null;
+            let up = (currentHeightLength > 1) ? idx - this.widthLength : null;
+            let down = (currentHeightLength < this.heightLength) ? idx + this.widthLength: null;
 
             if (left) { this.addEdge(idx, left, "left") }
             if (right) { this.addEdge(idx, right, "right") }

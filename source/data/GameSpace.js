@@ -11,6 +11,8 @@ class GameSpace {
         this.player = null;
         this.cameraState = false;
         this.moveLocation = null;
+        this.level;
+        this.levelIdx = 1;
         // this.matrix = new Matrix(height, width, [
         //     {
         //         x: 500,
@@ -22,26 +24,98 @@ class GameSpace {
         // this.matrix.createMap()
     }
 
+    setLevel(level) {
+        this.level = level;
+    }
+
     addCharacter(character) {
         this.entityList.push(character);
     }
 
     collideObject(object) {
-        if (object.x < 0) { object.x = 0; object.velocityX = 0; }
-        else if (object.x + object.width > this.width) { object.x = this.width - object.width; }
-        if (object.y < 0) { object.y = 0; object.velocityY = 0; }
-        else if (object.y + object.height > this.height) { object.y = this.height - object.height;  }
+        let finalIdx;
+        for (let idx = 0; idx < this.entityList.length; idx++) { //find idx of object to be removed if it leaves boundaries
+            if (this.entityList[idx] === object) {
+                finalIdx = idx;
+            }
+        }
+
+        if (object.x < 0) { 
+            object.x = 0; object.velocityX = 0;
+            let move = this.level.get(this.levelIdx).left;
+            if (move) {  
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList; //get entityList
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.x = this.width - object.width; //if moved, then change x coordinates accordingly
+                this.player.moving = false;
+            }
+        } else if (object.x + object.width > this.width) { 
+            object.x = this.width - object.width;
+            let move = this.level.get(this.levelIdx).right;
+            if (move) {    //if right panel exists, move there
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.x = 0;
+                this.player.moving = false;
+            }
+        
+        } else if (object.y < 0) { 
+            object.y = 0; object.velocityY = 0; 
+            let move = this.level.get(this.levelIdx).up;
+            if (move) {  
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.y = this.height - object.height;
+                this.player.moving = false;
+            }
+        } else if (object.y + object.height > this.height) { 
+            object.y = this.height - object.height;
+            let move = this.level.get(this.levelIdx).down;
+            if (move) {
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.y = 0;
+                this.player.moving = false;
+            }
+        }
     }
 
     collisionCheck(mainObject, object) {
+        let check;
         if (mainObject.x < object.x && mainObject.x + mainObject.width > object.x && mainObject.y > object.y && mainObject.y < object.y + object.height) {
             mainObject.x = object.x - mainObject.width;
+            check = true;
         } else if (mainObject.x > object.x && mainObject.x < object.x + object.width && mainObject.y > object.y && mainObject.y < object.y + object.height) {
             mainObject.x = object.x + object.width;
-        } else if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            check = true;
+        }
+        
+        if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
             mainObject.y = object.y + mainObject.height;
+            check = true;
         } else if (mainObject.y > object.y && object.y + object.height > mainObject.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
             mainObject.y = object.y + object.height;
+            check = true;
+        }
+
+        if (check) {
+            let playerInEntity;
+            for (let entity of this.entityList) {
+                if (entity === this.player) {
+                    playerInEntity = entity;
+                }
+            }
+            this.player.moving = false;
+            playerInEntity.start = {};
+            playerInEntity.moving = false;
         }
     }
 
@@ -65,11 +139,8 @@ class GameSpace {
     }
 
     update() {
+        this.level.set(this.levelIdx, this.entityList);
         if (this.player) {
-            if (this.cameraState) {
-                this.player.x = document.body.clientWidth / 2;
-                this.player.y = document.body.clientHeight / 2;
-            }
             this.entityListPositionUpdate();
             let playerInEntity;
             for (let entity of this.entityList) {
@@ -77,10 +148,16 @@ class GameSpace {
                     playerInEntity = entity;
                 }
             }
-            this.collideObject(playerInEntity)
+            if (playerInEntity) {
+                this.collideObject(playerInEntity)
+
+            }
             for (let entity of this.entityList) {
                 if (entity !== playerInEntity) {
-                    this.collisionCheck(playerInEntity, entity)
+                    if (playerInEntity) {
+                        this.collisionCheck(playerInEntity, entity)
+
+                    }
                 }
             }
         }
@@ -173,11 +250,11 @@ class GameSpace {
         if (this.player) {
             if (!this.cameraState) {
                 let playerInEntity;
-                    for (let entity of this.entityList) {
-                        if (entity === this.player) {
-                            playerInEntity = entity;
-                        }
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
                     }
+                }
 
                 playerInEntity.currentSteps = 1;
                 playerInEntity.start = {};
@@ -193,7 +270,6 @@ class GameSpace {
                 playerInEntity.moving = true;
                 playerInEntity.direction = {};
                 playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
-                console.log(playerInEntity.steps)
                 playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
                 playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
             } else {

@@ -1,7 +1,7 @@
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
-        this.component = null;
+        this.componentList = [];
         this.layer = layer;
         this.parentNode = parentNode;
     }
@@ -25,21 +25,42 @@ class Canvas {
         this.parentNode.appendChild(this.canvas)
     }
 
+    deleteSelf() {
+        console.log("remove")
+        this.parentNode.removeChild(this.canvas);
+    }
+
+    isNotEmpty() {
+        return (this.componentList.length > 0);
+    }
+
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     draw() {
-        this.component.drawImage(this.context);
+        for (let component of this.componentList) {
+            component.drawImage(this.context);
+        }
+        
+    }
+
+    update(component) {
+        for (let value of this.componentList) {
+            if (value.id === component.id) {
+                value.update(component)
+            }
+        }
     }
 
 
-    set(component) {
-        this.component = component;
+    add(component) {
+        this.componentList.push(component);
+        component.drawImage(this.context);
     }
 
     get() {
-        return this.component;
+        return this.componentList;
     }
 }
 

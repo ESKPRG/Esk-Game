@@ -526,8 +526,8 @@ function functionBindPolyfill(context) {
 },{}],2:[function(require,module,exports){
 class AdjacencyMatrix {
     constructor(heightLength, widthLength, obstacleList, distance) {
-        this.heightLength = Math.floor(heightLength / 10);
-        this.widthLength = Math.floor(widthLength / 10);
+        this.heightLength = Math.floor(heightLength / distance);
+        this.widthLength = Math.floor(widthLength / distance);
         this.obstacleList = obstacleList;
         this.distance = distance;
         this.matrix = new Map();
@@ -710,7 +710,34 @@ class AdjacencyMatrix {
         // return this.findShortestRoute(currentNumber, destinationNumber, currentList.concat(currentNumber.idx))
     }
 
+    addEntity(x, y, entity) {
+        let currentWidthLength = 1;
+        let currentHeightLength = 1;
+        for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
+            if (!this.get(idx)['entityList']) {
+                this.get(idx)['entityList'] = [];
+            }
+            if (currentWidthLength === x && currentHeightLength === y) {
+                this.matrix.get(idx)['entityList'].push(entity);
+            }
 
+            if (currentWidthLength < this.widthLength) {
+                currentWidthLength += 1
+            } else {
+                currentWidthLength = 1;
+                currentHeightLength += 1;
+            }
+        }
+    }
+
+    get(idx) {
+        return this.matrix.get(idx);
+    }
+
+    set(idx, entityList) {
+        this.matrix.get(idx).entityList = entityList;
+    }
+    
 
     createMap() {
         let currentWidthLength = 1;
@@ -718,12 +745,11 @@ class AdjacencyMatrix {
         for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
             this.addVertex(idx);
         }
-
         for (let idx = 1; idx < this.heightLength * this.widthLength + 1; idx++) {
-            let left = (currentWidthLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - 1 : null;
-            let right = (currentWidthLength < this.widthLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + 1: null;
-            let up = (currentHeightLength > 1 && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx - this.widthLength : null;
-            let down = (currentHeightLength < this.heightLength && this.checkObstacle(currentWidthLength, currentHeightLength, this.obstacleList)) ? idx + this.widthLength: null;
+            let left = (currentWidthLength > 1) ? idx - 1 : null;
+            let right = (currentWidthLength < this.widthLength) ? idx + 1: null;
+            let up = (currentHeightLength > 1) ? idx - this.widthLength : null;
+            let down = (currentHeightLength < this.heightLength) ? idx + this.widthLength: null;
 
             if (left) { this.addEdge(idx, left, "left") }
             if (right) { this.addEdge(idx, right, "right") }
@@ -836,18 +862,41 @@ class Camera {
             case "DemiGod": component = Component.demiGod(entity); break;
             case "Brawler": component = Component.block(entity);
         }
-        let canvas = this.createNewLayer(component.layer);
-        canvas.set(component);
+
+        let addCheck = true;
+
+        for (let canvas of this.canvasList) {
+            if (canvas.layer === component.layer){
+                canvas.add(component);
+                addCheck = false;
+            }
+        }
+
+        if (addCheck) {
+            let canvas = this.createNewLayer(component.layer);
+            canvas.add(component);
+        }
+    }
+
+    updateCanvasList() {
+        for (let canvas of this.canvasList) {
+            canvas.canvasList = [];
+        }
     }
 
     updateLocations(locationObject) {
         for (let object of Object.values(locationObject)) {
+            let check = false;
             for (let canvas of this.canvasList) {
                 if (canvas.layer !== 0) {
                     if (object.id === canvas.layer) {
-                        canvas.component.update(object)
+                        check = true;
+                        canvas.update(object)
                     }
                 }
+            }
+            if (!check) {
+                this.addNewComponent(object);
             }
         }
     }
@@ -875,7 +924,7 @@ module.exports = Camera;
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
-        this.component = null;
+        this.componentList = [];
         this.layer = layer;
         this.parentNode = parentNode;
     }
@@ -899,21 +948,42 @@ class Canvas {
         this.parentNode.appendChild(this.canvas)
     }
 
+    deleteSelf() {
+        console.log("remove")
+        this.parentNode.removeChild(this.canvas);
+    }
+
+    isNotEmpty() {
+        return (this.componentList.length > 0);
+    }
+
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     draw() {
-        this.component.drawImage(this.context);
+        for (let component of this.componentList) {
+            component.drawImage(this.context);
+        }
+        
+    }
+
+    update(component) {
+        for (let value of this.componentList) {
+            if (value.id === component.id) {
+                value.update(component)
+            }
+        }
     }
 
 
-    set(component) {
-        this.component = component;
+    add(component) {
+        this.componentList.push(component);
+        component.drawImage(this.context);
     }
 
     get() {
-        return this.component;
+        return this.componentList;
     }
 }
 
@@ -944,24 +1014,29 @@ class Component {
         this.height = height;
         this.type = type;
         this.color = color;
+        this.check = true;
     }
 
-    drawImage(ctx) {   
-        if (this.type === 'image') {
-            this.image = new Image();
-            this.image.src = this.color;
-            this.image.addEventListener('load', e => {
-                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            });
-        } else {
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.width, this.height)
+    drawImage(ctx) {  
+        if (!this.check) { 
+            if (this.type === 'image') {
+                this.image = new Image();
+                this.image.src = this.color;
+                this.image.addEventListener('load', e => {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                });
+            } else {
+                this.check = true;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+            }
         }
     }
 
     update(object) {
         this.x = object.x;
         this.y = object.y;
+        this.check = false;
     }
 
     static demiGod(character) {
@@ -1276,6 +1351,7 @@ module.exports = Endurance;
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
+const Matrix = require('./AdjacencyMatrix.js');
 
 let divGameScreen = document.createElement('div');
 divGameScreen.setAttribute('id', 'mainBox')
@@ -1301,6 +1377,30 @@ class Engine extends EE{
     addCharacter(character) {
         this.gameSpace.addCharacter(character);
         this.camera.addNewComponent(character);
+    }
+
+    createLevel(levelWidth, levelHeight, entityList) {
+        let entityXSize;
+        let entityYSize;
+        let xSize = Math.ceil(levelWidth / this.gameSpace.width);
+        let ySize = Math.ceil(levelHeight / this.gameSpace.height);
+
+        let matrix = new Matrix(ySize, xSize, [], 1);
+        matrix.createMap();
+
+        for (let entity of entityList) {
+            entityXSize = Math.ceil(entity.x / this.gameSpace.width);
+            entityYSize = Math.ceil(entity.y / this.gameSpace.height);
+
+            matrix.addEntity(entityXSize, entityYSize, entity)
+        }
+
+        return matrix;
+    }
+
+    addLevel(width, height, entityList) {
+        let level = this.createLevel(width, height, entityList);
+        this.gameSpace.setLevel(level);
     }
 
     keyDown(direction, down) {
@@ -1331,7 +1431,7 @@ class Engine extends EE{
 }
 
 module.exports = Engine;
-},{"./Camera.js":6,"./Controller.js":11,"events":1}],20:[function(require,module,exports){
+},{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":11,"events":1}],20:[function(require,module,exports){
 class Entity {
     constructor(name, description, image, x, y, width, height, entityType) {
         this.id = Math.floor((Math.random() * 1000000) + 1);
@@ -1389,6 +1489,8 @@ class GameSpace {
         this.player = null;
         this.cameraState = false;
         this.moveLocation = null;
+        this.level;
+        this.levelIdx = 1;
         // this.matrix = new Matrix(height, width, [
         //     {
         //         x: 500,
@@ -1400,26 +1502,98 @@ class GameSpace {
         // this.matrix.createMap()
     }
 
+    setLevel(level) {
+        this.level = level;
+    }
+
     addCharacter(character) {
         this.entityList.push(character);
     }
 
     collideObject(object) {
-        if (object.x < 0) { object.x = 0; object.velocityX = 0; }
-        else if (object.x + object.width > this.width) { object.x = this.width - object.width; }
-        if (object.y < 0) { object.y = 0; object.velocityY = 0; }
-        else if (object.y + object.height > this.height) { object.y = this.height - object.height;  }
+        let finalIdx;
+        for (let idx = 0; idx < this.entityList.length; idx++) { //find idx of object to be removed if it leaves boundaries
+            if (this.entityList[idx] === object) {
+                finalIdx = idx;
+            }
+        }
+
+        if (object.x < 0) { 
+            object.x = 0; object.velocityX = 0;
+            let move = this.level.get(this.levelIdx).left;
+            if (move) {  
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList; //get entityList
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.x = this.width - object.width; //if moved, then change x coordinates accordingly
+                this.player.moving = false;
+            }
+        } else if (object.x + object.width > this.width) { 
+            object.x = this.width - object.width;
+            let move = this.level.get(this.levelIdx).right;
+            if (move) {    //if right panel exists, move there
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.x = 0;
+                this.player.moving = false;
+            }
+        
+        } else if (object.y < 0) { 
+            object.y = 0; object.velocityY = 0; 
+            let move = this.level.get(this.levelIdx).up;
+            if (move) {  
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.y = this.height - object.height;
+                this.player.moving = false;
+            }
+        } else if (object.y + object.height > this.height) { 
+            object.y = this.height - object.height;
+            let move = this.level.get(this.levelIdx).down;
+            if (move) {
+                this.entityList.splice(finalIdx, 1)
+                this.entityList = this.level.get(move).entityList;
+                this.entityList.push(object)
+                this.levelIdx = move;
+                object.y = 0;
+                this.player.moving = false;
+            }
+        }
     }
 
     collisionCheck(mainObject, object) {
+        let check;
         if (mainObject.x < object.x && mainObject.x + mainObject.width > object.x && mainObject.y > object.y && mainObject.y < object.y + object.height) {
             mainObject.x = object.x - mainObject.width;
+            check = true;
         } else if (mainObject.x > object.x && mainObject.x < object.x + object.width && mainObject.y > object.y && mainObject.y < object.y + object.height) {
             mainObject.x = object.x + object.width;
-        } else if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
+            check = true;
+        }
+        
+        if (mainObject.y < object.y && mainObject.y + mainObject.height > object.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
             mainObject.y = object.y + mainObject.height;
+            check = true;
         } else if (mainObject.y > object.y && object.y + object.height > mainObject.y && mainObject.x < object.x && mainObject.x + mainObject.width > object.x) {
             mainObject.y = object.y + object.height;
+            check = true;
+        }
+
+        if (check) {
+            let playerInEntity;
+            for (let entity of this.entityList) {
+                if (entity === this.player) {
+                    playerInEntity = entity;
+                }
+            }
+            this.player.moving = false;
+            playerInEntity.start = {};
+            playerInEntity.moving = false;
         }
     }
 
@@ -1443,11 +1617,8 @@ class GameSpace {
     }
 
     update() {
+        this.level.set(this.levelIdx, this.entityList);
         if (this.player) {
-            if (this.cameraState) {
-                this.player.x = document.body.clientWidth / 2;
-                this.player.y = document.body.clientHeight / 2;
-            }
             this.entityListPositionUpdate();
             let playerInEntity;
             for (let entity of this.entityList) {
@@ -1455,10 +1626,16 @@ class GameSpace {
                     playerInEntity = entity;
                 }
             }
-            this.collideObject(playerInEntity)
+            if (playerInEntity) {
+                this.collideObject(playerInEntity)
+
+            }
             for (let entity of this.entityList) {
                 if (entity !== playerInEntity) {
-                    this.collisionCheck(playerInEntity, entity)
+                    if (playerInEntity) {
+                        this.collisionCheck(playerInEntity, entity)
+
+                    }
                 }
             }
         }
@@ -1551,11 +1728,11 @@ class GameSpace {
         if (this.player) {
             if (!this.cameraState) {
                 let playerInEntity;
-                    for (let entity of this.entityList) {
-                        if (entity === this.player) {
-                            playerInEntity = entity;
-                        }
+                for (let entity of this.entityList) {
+                    if (entity === this.player) {
+                        playerInEntity = entity;
                     }
+                }
 
                 playerInEntity.currentSteps = 1;
                 playerInEntity.start = {};
@@ -1571,7 +1748,6 @@ class GameSpace {
                 playerInEntity.moving = true;
                 playerInEntity.direction = {};
                 playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
-                console.log(playerInEntity.steps)
                 playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
                 playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
             } else {
@@ -2306,7 +2482,13 @@ const engine = new Engine(
     1
 )
 
+engine.addLevel(3000, 1500, [
+    DemiGod.create("bad", 1000, 500)
+])
+
 engine.addCharacter(DemiGod.create("Hazar", 100, 100))
+engine.addCharacter(DemiGod.create("ygit", 500, 500))
+
 
 
 engine.start();
