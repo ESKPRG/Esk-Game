@@ -1,15 +1,56 @@
 const Component = require('./Component.js');
 
-class characterComponent extends Component {
-    constructor(id, x, y, color, width, height, type) {
-        super(id, x, y, 2, color, width, height, type)
-        this.velocityX = 0;
-        this.velocityY = 0;
-        this.jump = 16; 
-        this.jumping = false;
+class CharacterComponent extends Component {
+    constructor(id, x, y, layer, color, width, height, type, back, left, right, backLeft, backRight, frontLeft, frontRight) {
+        super(id, x, y, layer, color, width, height, type)
+        this.back = back;
+        this.left = left;
+        this.right = right;
+        this.backLeft = backLeft;
+        this.backRight = backRight;
+        this.frontLeft = frontLeft;
+        this.frontRight = frontRight;
     }
     
+    static demiGod(character) {
+        return new CharacterComponent(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            "",
+            character.width,
+            character.height,
+            Component.IMAGE,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        )
+    }
 
+    static brawler(character) {
+        return new CharacterComponent(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            "",
+            character.width,
+            character.height,
+            Component.IMAGE,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        )
+    }
 }
 
-module.exports = characterComponent;
+module.exports = CharacterComponent;

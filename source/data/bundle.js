@@ -781,7 +781,7 @@ class Attribute extends Entity {
 }
 
 module.exports = Attribute;
-},{"./Entity.js":20}],4:[function(require,module,exports){
+},{"./Entity.js":21}],4:[function(require,module,exports){
 // const Head = require('./Head.js');
 // const Chest = require('./Chest.js');
 // const Legs = require('./Legs.js');
@@ -837,10 +837,11 @@ Building.OPEN = 'Active'
 Building.CLOSED = 'Inactive'
 
 module.exports = Building
-},{"./Door.js":16,"./Plain.js":34}],6:[function(require,module,exports){
+},{"./Door.js":17,"./Plain.js":35}],6:[function(require,module,exports){
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
 const TextComponent = require('./TextComponent.js');
+const CharacterComponent = require('./CharacterComponent.js');
 
 class Camera {
     constructor(destination) {
@@ -860,8 +861,8 @@ class Camera {
     addNewComponent(entity) {
         let component;
         switch(entity.description) {
-            case "DemiGod": component = Component.demiGod(entity); break;
-            case "Brawler": component = Component.block(entity); break;
+            case "DemiGod": component = CharacterComponent.demiGod(entity); break;
+            case "Brawler": component = CharacterComponent.block(entity); break;
             case "startButton": component = TextComponent.text(entity); break;
         }
 
@@ -922,7 +923,7 @@ class Camera {
 }
 
 module.exports = Camera;
-},{"./Canvas.js":7,"./Component.js":9,"./TextComponent.js":48}],7:[function(require,module,exports){
+},{"./Canvas.js":7,"./CharacterComponent.js":9,"./Component.js":10,"./TextComponent.js":49}],7:[function(require,module,exports){
 class Canvas {
     constructor(parentNode, layer) {
         this.canvas = document.createElement('canvas');
@@ -1004,7 +1005,64 @@ Character.DEMIGOD = 'demigod';
 
 
 module.exports = Character;
-},{"./Person.js":33}],9:[function(require,module,exports){
+},{"./Person.js":34}],9:[function(require,module,exports){
+const Component = require('./Component.js');
+
+class CharacterComponent extends Component {
+    constructor(id, x, y, layer, color, width, height, type, back, left, right, backLeft, backRight, frontLeft, frontRight) {
+        super(id, x, y, layer, color, width, height, type)
+        this.back = back;
+        this.left = left;
+        this.right = right;
+        this.backLeft = backLeft;
+        this.backRight = backRight;
+        this.frontLeft = frontLeft;
+        this.frontRight = frontRight;
+    }
+    
+    static demiGod(character) {
+        return new CharacterComponent(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            "",
+            character.width,
+            character.height,
+            Component.IMAGE,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        )
+    }
+
+    static brawler(character) {
+        return new CharacterComponent(
+            character.id,
+            character.x,
+            character.y,
+            character.id,
+            "",
+            character.width,
+            character.height,
+            Component.IMAGE,
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        )
+    }
+}
+
+module.exports = CharacterComponent;
+},{"./Component.js":10}],10:[function(require,module,exports){
 class Component {
     constructor(id, x, y, layer, width, height, type, color, componentType) {
         this.id = id;
@@ -1048,17 +1106,6 @@ class Component {
         this.check = false;
     }
 
-    static demiGod(character) {
-        return new Component(
-            character.id,
-            character.x, character.y,
-            character.id,
-            character.width,
-            character.height,
-            'block',
-            "red"
-        )
-    }
     static block(character) {
         return new Component(
             character.id,
@@ -1091,8 +1138,11 @@ Component.IMAGE = 'image';
 Component.BLOCK = 'block';
 Component.TEXT = 'text';
 
+Component.CHARACTER = 'character';
+Component.ICON = 'icon';
+
 module.exports = Component;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Constitution extends Attribute {
@@ -1113,7 +1163,7 @@ class Constitution extends Attribute {
 }
 
 module.exports = Constitution;
-},{"./Attribute.js":3}],11:[function(require,module,exports){
+},{"./Attribute.js":3}],12:[function(require,module,exports){
 class Controller {
     constructor() {
         document.body.addEventListener('click', (event) => this.emitEvent('click', event));
@@ -1143,7 +1193,7 @@ class Controller {
 }
 
 module.exports = Controller;
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 const Location = require('./Location.js')
 
 class Country extends Location {
@@ -1161,7 +1211,7 @@ Country.RICH = 'rich';
 
 module.exports = Country;
 
-},{"./Location.js":29}],13:[function(require,module,exports){
+},{"./Location.js":30}],14:[function(require,module,exports){
 const Character = require('./Character.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -1207,7 +1257,7 @@ class DemiGod extends Character {
 }
 
 module.exports = DemiGod;
-},{"./Character.js":8,"./Inventory.js":27,"./Person.js":33,"./State.js":44,"./Stats.js":45}],14:[function(require,module,exports){
+},{"./Character.js":8,"./Inventory.js":28,"./Person.js":34,"./State.js":45,"./Stats.js":46}],15:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Dexterity extends Attribute {
@@ -1228,7 +1278,7 @@ class Dexterity extends Attribute {
 }
 
 module.exports = Dexterity;
-},{"./Attribute.js":3}],15:[function(require,module,exports){
+},{"./Attribute.js":3}],16:[function(require,module,exports){
 const Location = require('./Location.js');
 
 class District extends Location {
@@ -1249,7 +1299,7 @@ class District extends Location {
 }
 
 module.exports = District;
-},{"./Location.js":29}],16:[function(require,module,exports){
+},{"./Location.js":30}],17:[function(require,module,exports){
 const Props = require('./Props.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
@@ -1294,7 +1344,7 @@ class Door extends Props {
 }
 
 module.exports = Door;
-},{"./Inventory.js":27,"./Props.js":36,"./State.js":44,"./Stats.js":45}],17:[function(require,module,exports){
+},{"./Inventory.js":28,"./Props.js":37,"./State.js":45,"./Stats.js":46}],18:[function(require,module,exports){
 const Planet = require('./Planet.js');
 const Greece = require('./Greece.js');
 const Italy = require('./Italy.js')
@@ -1340,7 +1390,7 @@ class Earth extends Planet {
 }
 
 module.exports = Earth
-},{"./District":15,"./Greece.js":23,"./Italy.js":28,"./Planet.js":35,"./School.js":39,"./Shop.js":40,"./ShoppingMall.js":43}],18:[function(require,module,exports){
+},{"./District":16,"./Greece.js":24,"./Italy.js":29,"./Planet.js":36,"./School.js":40,"./Shop.js":41,"./ShoppingMall.js":44}],19:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Endurance extends Attribute {
@@ -1361,7 +1411,7 @@ class Endurance extends Attribute {
 }
 
 module.exports = Endurance;
-},{"./Attribute.js":3}],19:[function(require,module,exports){
+},{"./Attribute.js":3}],20:[function(require,module,exports){
 const Camera = require('./Camera.js');
 const Controller = require('./Controller.js');
 const EE = require('events');
@@ -1488,7 +1538,7 @@ class Engine extends EE{
 }
 
 module.exports = Engine;
-},{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":11,"./Icon.js":24,"./Scene.js":37,"./SceneHandler.js":38,"events":1}],20:[function(require,module,exports){
+},{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":12,"./Icon.js":25,"./Scene.js":38,"./SceneHandler.js":39,"events":1}],21:[function(require,module,exports){
 class Entity {
     constructor(name, description, image, x, y, width, height, entityType) {
         this.id = Math.floor((Math.random() * 1000000) + 1);
@@ -1512,7 +1562,7 @@ Entity.QUEST = 'quest';
 Entity.LOCATION = 'location';
 
 module.exports = Entity;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Faith extends Attribute {
@@ -1533,7 +1583,7 @@ class Faith extends Attribute {
 }
 
 module.exports = Faith;
-},{"./Attribute.js":3}],22:[function(require,module,exports){
+},{"./Attribute.js":3}],23:[function(require,module,exports){
 const DemiGod = require('./DemiGod.js');
 const Matrix = require('./AdjacencyMatrix.js');
 
@@ -1871,7 +1921,7 @@ class GameSpace {
 
 
 module.exports = GameSpace;
-},{"./AdjacencyMatrix.js":2,"./DemiGod.js":13}],23:[function(require,module,exports){
+},{"./AdjacencyMatrix.js":2,"./DemiGod.js":14}],24:[function(require,module,exports){
 const Country = require('./Country.js');
 
 class Greece extends Country {
@@ -1894,7 +1944,7 @@ class Greece extends Country {
 }
 
 module.exports = Greece;
-},{"./Country.js":12}],24:[function(require,module,exports){
+},{"./Country.js":13}],25:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Icon extends Entity {
@@ -1954,7 +2004,7 @@ class Icon extends Entity {
 }
 
 module.exports = Icon;
-},{"./Entity.js":20}],25:[function(require,module,exports){
+},{"./Entity.js":21}],26:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Intelligence extends Attribute {
@@ -1976,7 +2026,7 @@ class Intelligence extends Attribute {
 }
 
 module.exports = Intelligence;
-},{"./Attribute.js":3}],26:[function(require,module,exports){
+},{"./Attribute.js":3}],27:[function(require,module,exports){
 const Entity = require('./Entity.js')
 
 class Interactable extends Entity {
@@ -1997,7 +2047,7 @@ Interactable.USABLE = 'usable';
 Interactable.PERSON = 'person';
 
 module.exports = Interactable;                                     
-},{"./Entity.js":20}],27:[function(require,module,exports){
+},{"./Entity.js":21}],28:[function(require,module,exports){
 class Inventory {
     constructor() {
         this.list = []
@@ -2020,7 +2070,7 @@ class Inventory {
 }
 
 module.exports = Inventory;
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 const Country = require('./Country.js');
 
 class Italy extends Country {
@@ -2043,7 +2093,7 @@ class Italy extends Country {
 }
 
 module.exports = Italy;
-},{"./Country.js":12}],29:[function(require,module,exports){
+},{"./Country.js":13}],30:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Location extends Entity {
@@ -2054,7 +2104,7 @@ class Location extends Entity {
 }
 
 module.exports = Location;
-},{"./Entity.js":20}],30:[function(require,module,exports){
+},{"./Entity.js":21}],31:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Luck extends Attribute {
@@ -2075,7 +2125,7 @@ class Luck extends Attribute {
 }
 
 module.exports = Luck;
-},{"./Attribute.js":3}],31:[function(require,module,exports){
+},{"./Attribute.js":3}],32:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Memory extends Attribute {
@@ -2096,7 +2146,7 @@ class Memory extends Attribute {
 }
 
 module.exports = Memory;
-},{"./Attribute.js":3}],32:[function(require,module,exports){
+},{"./Attribute.js":3}],33:[function(require,module,exports){
 const Person = require('./Person.js');
 
 class Npc extends Person {
@@ -2108,7 +2158,7 @@ class Npc extends Person {
 }
 
 module.exports = Npc;
-},{"./Person.js":33}],33:[function(require,module,exports){
+},{"./Person.js":34}],34:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Person extends Interactable {
@@ -2128,7 +2178,7 @@ Person.LAWFULGOOD = 'lawfulGood'
 Person.EVIL = 'evil';
 
 module.exports = Person;
-},{"./Interactable.js":26}],34:[function(require,module,exports){
+},{"./Interactable.js":27}],35:[function(require,module,exports){
 const Entity = require('./Entity.js');
 
 class Plain extends Entity {
@@ -2139,7 +2189,7 @@ class Plain extends Entity {
 }
 
 module.exports = Plain;
-},{"./Entity.js":20}],35:[function(require,module,exports){
+},{"./Entity.js":21}],36:[function(require,module,exports){
 class Planet {
     constructor(name, countryList) {
         this.name = name;
@@ -2150,7 +2200,7 @@ class Planet {
 }
 
 module.exports = Planet
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 const Usable = require('./Usable.js');
 
 class Props extends Usable {
@@ -2160,7 +2210,7 @@ class Props extends Usable {
 }
 
 module.exports = Props;
-},{"./Usable.js":51}],37:[function(require,module,exports){
+},{"./Usable.js":52}],38:[function(require,module,exports){
 class Scene {
     constructor(name, level, run) {
         this.name = name;
@@ -2175,7 +2225,7 @@ class Scene {
 }
 
 module.exports = Scene;
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 class SceneHandler {
     constructor() {
         this.sceneList = []
@@ -2225,7 +2275,7 @@ class SceneHandler {
 }
 
 module.exports = SceneHandler;
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 const Building = require('./Building.js');
 
 class School extends Building {
@@ -2262,7 +2312,7 @@ class School extends Building {
 }
 
 module.exports = School;
-},{"./Building.js":5}],40:[function(require,module,exports){
+},{"./Building.js":5}],41:[function(require,module,exports){
 const Building = require('./Building.js')
 const ShopKeeper = require('./ShopKeeper.js')
 const ShopUpgradePlan = require('./ShopUpgradePlan.js')
@@ -2294,7 +2344,7 @@ class Shop extends Building {
 }
 
 module.exports = Shop
-},{"./Building.js":5,"./ShopKeeper.js":41,"./ShopUpgradePlan.js":42}],41:[function(require,module,exports){
+},{"./Building.js":5,"./ShopKeeper.js":42,"./ShopUpgradePlan.js":43}],42:[function(require,module,exports){
 const Npc = require('./Npc.js')
 const stats = require('./stats.js');
 const inventory = require('./inventory.js');
@@ -2314,7 +2364,7 @@ class ShopKeeper extends Npc {
 }
 
 module.exports = ShopKeeper
-},{"./Body.js":4,"./Npc.js":32,"./Status.js":46,"./experience.js":53,"./intelligence.js":55,"./inventory.js":56,"./stats.js":57}],42:[function(require,module,exports){
+},{"./Body.js":4,"./Npc.js":33,"./Status.js":47,"./experience.js":54,"./intelligence.js":56,"./inventory.js":57,"./stats.js":58}],43:[function(require,module,exports){
 const UpgradePlan = require('./UpgradePlan.js')
 const UpgradeToken = require('./UpgradeToken.js')
 const shop = require('./Shop.js')
@@ -2410,7 +2460,7 @@ class ShopUpgradePlan extends UpgradePlan {
 }
 
 module.exports = ShopUpgradePlan
-},{"./Shop.js":40,"./UpgradePlan.js":49,"./UpgradeToken.js":50}],43:[function(require,module,exports){
+},{"./Shop.js":41,"./UpgradePlan.js":50,"./UpgradeToken.js":51}],44:[function(require,module,exports){
 const Building = require('./Building.js');
 const Door = require
 
@@ -2436,7 +2486,7 @@ class ShoppingMall extends Building {
 }
 
 module.exports = ShoppingMall;
-},{"./Building.js":5}],44:[function(require,module,exports){
+},{"./Building.js":5}],45:[function(require,module,exports){
 const Entity = require('./Entity.js');
 const Status = require('./Status.js');
 
@@ -2454,7 +2504,7 @@ class State extends Entity {
 }
 
 module.exports = State;
-},{"./Entity.js":20,"./Status.js":46}],45:[function(require,module,exports){
+},{"./Entity.js":21,"./Status.js":47}],46:[function(require,module,exports){
 const S = require('./Strength.js');
 const D = require('./Dexterity.js');
 const E = require('./Endurance.js');
@@ -2496,7 +2546,7 @@ class Stats {
 }
 
 module.exports = Stats;
-},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":25,"./Luck.js":30,"./Memory.js":31,"./Strength.js":47,"./Wits.js":52}],46:[function(require,module,exports){
+},{"./Constitution.js":11,"./Dexterity.js":15,"./Endurance.js":19,"./Faith.js":22,"./Intelligence.js":26,"./Luck.js":31,"./Memory.js":32,"./Strength.js":48,"./Wits.js":53}],47:[function(require,module,exports){
 class Status {
     constructor() {
         this.buff = []
@@ -2520,7 +2570,7 @@ class Status {
 }
 
 module.exports = Status
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Strength extends Attribute {
@@ -2541,7 +2591,7 @@ class Strength extends Attribute {
 }
 
 module.exports = Strength;
-},{"./Attribute.js":3}],48:[function(require,module,exports){
+},{"./Attribute.js":3}],49:[function(require,module,exports){
 const Component = require('./Component.js');
 
 class TextComponent extends Component {
@@ -2571,7 +2621,7 @@ class TextComponent extends Component {
 }
 
 module.exports = TextComponent;
-},{"./Component.js":9}],49:[function(require,module,exports){
+},{"./Component.js":10}],50:[function(require,module,exports){
 class UpgradePlan {
     constructor() {
         this.first = null
@@ -2617,7 +2667,7 @@ class UpgradePlan {
 }
 
 module.exports = UpgradePlan
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 class UpgradeToken {
     constructor(upgrade, name, cost) {
         this.next = []
@@ -2637,7 +2687,7 @@ class UpgradeToken {
 }
 
 module.exports = UpgradeToken
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 const Interactable = require('./Interactable.js');
 
 class Usable extends Interactable {
@@ -2649,7 +2699,7 @@ class Usable extends Interactable {
 }
 
 module.exports = Usable;
-},{"./Interactable.js":26}],52:[function(require,module,exports){
+},{"./Interactable.js":27}],53:[function(require,module,exports){
 const Attribute = require('./Attribute.js');
 
 class Wits extends Attribute {
@@ -2670,7 +2720,7 @@ class Wits extends Attribute {
 }
 
 module.exports = Wits;
-},{"./Attribute.js":3}],53:[function(require,module,exports){
+},{"./Attribute.js":3}],54:[function(require,module,exports){
 class Experience {
     constructor() {
         this.experience = 0;
@@ -2690,7 +2740,7 @@ class Experience {
 }
 
 module.exports = Experience;
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 const Engine = require('./Engine.js');
 const GameState = require('./GameSpace.js');
 const Earth = require('./Earth.js')
@@ -2734,10 +2784,10 @@ engine.prepareGame(game);
 engine.start();
 
 
-},{"./DemiGod.js":13,"./Earth.js":17,"./Engine.js":19,"./GameSpace.js":22,"./Icon.js":24}],55:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"./Attribute.js":3,"dup":25}],56:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],57:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"./Constitution.js":10,"./Dexterity.js":14,"./Endurance.js":18,"./Faith.js":21,"./Intelligence.js":25,"./Luck.js":30,"./Memory.js":31,"./Strength.js":47,"./Wits.js":52,"dup":45}]},{},[54]);
+},{"./DemiGod.js":14,"./Earth.js":18,"./Engine.js":20,"./GameSpace.js":23,"./Icon.js":25}],56:[function(require,module,exports){
+arguments[4][26][0].apply(exports,arguments)
+},{"./Attribute.js":3,"dup":26}],57:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],58:[function(require,module,exports){
+arguments[4][46][0].apply(exports,arguments)
+},{"./Constitution.js":11,"./Dexterity.js":15,"./Endurance.js":19,"./Faith.js":22,"./Intelligence.js":26,"./Luck.js":31,"./Memory.js":32,"./Strength.js":48,"./Wits.js":53,"dup":46}]},{},[55]);

@@ -1,12 +1,12 @@
 const Building = require('./Building.js');
 
 class School extends Building {
-    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
+    constructor(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
     }
 
-    static create(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        return new School(
+    static create(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        return new School(id,
             name, description,
             image, x, y,
             width, height,
@@ -17,8 +17,9 @@ class School extends Building {
         )
     }
 
-    static greekSchool() {
+    static greekSchool(id) {
         return new School(
+            id,
             "Greek school",
             "School in the greek faction of earth",
             "",

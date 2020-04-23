@@ -1,8 +1,8 @@
 const Entity = require('./Entity.js');
 
 class Quest extends Entity {
-    constructor(name, description, image, type, location, reward) {
-        super(name, description, image, 0, 0, 0, 0, Entity.QUEST);
+    constructor(id, name, description, image, type, location, reward) {
+        super(id, name, description, image, 0, 0, 0, 0, Entity.QUEST);
         this.questType = type
         this.difficulty = difficulty
         this.location  = location

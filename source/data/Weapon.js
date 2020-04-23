@@ -3,8 +3,8 @@ const Stats = require('./Stats.js');
 const State = require('./State.js');
 
 class Weapon extends Equipable {
-    constructor(name, description, image, stats, state, inventory, endurance, rarity, price, level, slot, damage, accuracy, reach) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, rarity, price, level, slot, Equipable.WEAPON);
+    constructor(id, name, description, image, stats, state, inventory, endurance, rarity, price, level, slot, damage, accuracy, reach) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, rarity, price, level, slot, Equipable.WEAPON);
         this.damage = damage;
         this.accuracy = accuracy;
         this.reach = reach;
@@ -18,13 +18,13 @@ class Weapon extends Equipable {
             Stats.create(
                 2, 2,
                 1, 1,
-                0, 0,
-                0, 0,
-                0, 0,
-                0, 0,
-                0, 0,
-                0, 0,
-                0, 0
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1,
+                0, 1
             ),
             new State(
                 50,

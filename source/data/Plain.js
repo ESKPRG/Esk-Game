@@ -1,8 +1,8 @@
 const Entity = require('./Entity.js');
 
 class Plain extends Entity {
-    constructor(name, description, image, x, y, width, height, plainSpace) {
-        super(name, description, image, x, y, width, height, Entity.PLAIN);
+    constructor(id, name, description, image, x, y, width, height, plainSpace) {
+        super(id, name, description, image, x, y, width, height, Entity.PLAIN);
         this.plainSpace = plainSpace;
     }
 }

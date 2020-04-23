@@ -41,17 +41,6 @@ class Component {
         this.check = false;
     }
 
-    static demiGod(character) {
-        return new Component(
-            character.id,
-            character.x, character.y,
-            character.id,
-            character.width,
-            character.height,
-            'block',
-            "red"
-        )
-    }
     static block(character) {
         return new Component(
             character.id,
@@ -83,5 +72,8 @@ class Component {
 Component.IMAGE = 'image';
 Component.BLOCK = 'block';
 Component.TEXT = 'text';
+
+Component.CHARACTER = 'character';
+Component.ICON = 'icon';
 
 module.exports = Component;

@@ -1,8 +1,8 @@
 const Entity = require('./Entity.js');
 
 class Icon extends Entity {
-    constructor(name, description, image, x, y, width, height, text, font, fillStyle, textAlign, use) {
-        super(name, description, image, x, y, width, height, Entity.ICON)
+    constructor(id, name, description, image, x, y, width, height, text, font, fillStyle, textAlign, use) {
+        super(id, name, description, image, x, y, width, height, Entity.ICON)
         this.text = text;
         this.font = font;
         this.fillStyle = fillStyle;
@@ -23,6 +23,7 @@ class Icon extends Entity {
 
     static startButton(x, y, width, height, text) {
         return new Icon(
+            id,
             "startButton",
             "startButton",
             "grey",
@@ -34,23 +35,6 @@ class Icon extends Entity {
             "center",
             () => {
                 this.emitEvent(this.text, this);
-            }
-        )
-    }
-
-    static blackBox(x, y, width, height) {
-        return new Icon(
-            "blackBox",
-            "",
-            "black",
-            x, y,
-            width, height,
-            null,
-            null,
-            null,
-            null,
-            () => {
-                this.emitEvent(this.text, this)
             }
         )
     }

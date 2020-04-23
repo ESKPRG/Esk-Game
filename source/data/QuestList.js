@@ -1,10 +1,32 @@
 class QuestList {
-    constructor(novice, intermediate, experienced, master, legendary) {
-        this.novice = novice
-        this.intermediate = intermediate
-        this.experienced = experienced
-        this.master = master
-        this.legendary = legendary
+    constructor() {
+        this.list = [];
+        this.completedList = [];
+        this.failedList = [];
+    }
+
+    add(quest) {
+        this.list.push(quest);
+    }
+
+    failed(failedQuest) {
+        let idx = 0;
+        for (let quest of this.list) {
+            if (failedQuest === quest) {
+                this.failedList.push(this.list.splice(idx, 1));
+            }
+            idx += 1;
+        }
+    }
+
+    completed(completedQuest) {
+        let idx = 0;
+        for (let quest of this.list) {
+            if (completedQuest === quest) {
+                this.completedList.push(this.list.splice(idx, 1))
+            }
+            idx += 1;
+        }
     }
 }
 

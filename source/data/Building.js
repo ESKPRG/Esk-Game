@@ -2,8 +2,8 @@ const Plain = require('./Plain.js');
 const Door = require('./Door.js');
 
 class Building extends Plain {
-    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        super(name, description, image, x, y, width, height, plainSpace);
+    constructor(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(id, name, description, image, x, y, width, height, plainSpace);
         this.door = Door.create();
         this.state = state;
         this.level = level;

@@ -24,6 +24,7 @@ class Engine extends EE{
         this.on('key', (event) => this.keyDown(event.direction, event.down));
         this.on('click', (event) => this.onClick(event.clientX, event.clientY));
         this.on('nextScene', () => this.nextScene())
+        this.player = null;
         this.gameState = {
             scene: "",
             entityCount: 1,

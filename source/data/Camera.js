@@ -1,6 +1,7 @@
 const Canvas = require('./Canvas.js');
 const Component = require('./Component.js');
 const TextComponent = require('./TextComponent.js');
+const CharacterComponent = require('./CharacterComponent.js');
 
 class Camera {
     constructor(destination) {
@@ -20,8 +21,8 @@ class Camera {
     addNewComponent(entity) {
         let component;
         switch(entity.description) {
-            case "DemiGod": component = Component.demiGod(entity); break;
-            case "Brawler": component = Component.block(entity); break;
+            case "DemiGod": component = CharacterComponent.demiGod(entity); break;
+            case "Brawler": component = CharacterComponent.block(entity); break;
             case "startButton": component = TextComponent.text(entity); break;
         }
 

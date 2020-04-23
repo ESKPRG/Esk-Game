@@ -1,6 +1,6 @@
 class Entity {
-    constructor(name, description, image, x, y, width, height, entityType) {
-        this.id = Math.floor((Math.random() * 1000000) + 1);
+    constructor(id, name, description, image, x, y, width, height, entityType) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;

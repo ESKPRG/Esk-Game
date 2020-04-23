@@ -26,8 +26,8 @@ class SceneHandler {
         this.currentScene.run();
     }
 
-    nextScene() {
-        this.currentScene = this.currentScene.connectedScenes[0];
+    nextScene(choice = 0) {
+        this.currentScene = this.currentScene.connectedScenes[choice];
         this.runScene();
     }
 

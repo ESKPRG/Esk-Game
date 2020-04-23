@@ -4,13 +4,14 @@ const State = require('./State.js');
 const Inventory = require('./Inventory.js');
 
 class Door extends Props {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount);
         this.locked = false;
     }
 
-    static create() {
+    static create(id) {
         return new Door(
+            id,
             "Door",
             "A wooden door",
             "",
