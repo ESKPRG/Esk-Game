@@ -1,0 +1,22 @@
+{
+  "name": "index.js",
+  "version": "0.2.0",
+  "description": "Express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ESKPRG/Esk-Game.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ESKPRG/Esk-Game/issues"
+  },
+  "homepage": "https://github.com/ESKPRG/Esk-Game#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
