@@ -1,6 +1,8 @@
 # Esk-Game
 The game project for the sixth-form students in esk.
 
+Online Version of the game: https://eskprg-byte.glitch.me/
+
 Hello all, I have decided to name the game 'Byte' after 0 consideration. It'll get changed later but just to make it easier to talk about.
 I am adding issues (improvments) as we move along, try to read the github documentation or guides on how to create pull requests, what they are for and all that good stuff, if you don't understand you can ask me. I will plan out stages for the development of the game and add it on discord and right here, so be sure to check from time to time. 
 
@@ -19,6 +21,16 @@ Byte is in the browser or on mobile phones. I hope for the production of the mob
 Why is Byte?
 Just cause. You know. Improving programming n' stuff.
 
+Story:
+As of now the main story line revolves around the tension between the two Superpowers Greece and Italy. Set in modern times, the only difference is the existance of different Greek and Roman gods and their worshiping counterparts. The player can choose to either begin in one of these set factions:
+    
+    -Greek Camp
+    -Roman Camp
+    -Rebel Camp
+    -Arab Camp (allahu akbar time)
+    -and more...
+The story is told from the perspective of this player and picked faction. The player can choose to help whichever faction, regardless of which one they picked in the start. As the war unfolds, another enemy emerges - one strong enough to destroy the world. It is the player's prophecy as well as a few select others to kill this evil and restore peace to the world. Doing both brings the player to the end of the game.
+
 Game Guide: 
 
     -Classes:
@@ -35,7 +47,7 @@ Game Guide:
         -Depraved;
 
 
-All object's properties will be seperated into different classes:
+All object's properties will be seperated into different classes
 
     -Stats
         -Strength (Higher attack damage, can carry more)
