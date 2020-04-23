@@ -12,7 +12,7 @@ class Component {
         this.check = true;
     }
 
-    drawImage(ctx) {  
+    drawImage(ctx) {
         if (!this.check) {
             if (this.color) {
                 // this.image = new Image();

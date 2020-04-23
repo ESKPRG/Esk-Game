@@ -23,7 +23,7 @@ class Icon extends Entity {
 
     static startButton(x, y, width, height, text) {
         return new Icon(
-            id,
+            1,
             "startButton",
             "startButton",
             "grey",

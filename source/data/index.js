@@ -13,7 +13,7 @@ const engine = new Engine(
         document.body.clientHeight,
         document.body.clientWidth
     ),
-    20, //framerate
+    50, //framerate
     1
 )
 
@@ -34,7 +34,7 @@ const scene2 = [
     3000, //width
     1500, //height
     [   
-        DemiGod.create("bad", 1000, 500), //entities
+        DemiGod.create("bad", 900, 900), //entities
         DemiGod.create("ygit", 500, 500),
         DemiGod.create("Hazar", 100, 100)
     ], 

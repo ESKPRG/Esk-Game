@@ -772,7 +772,7 @@ const Entity = require('./Entity.js');
 
 class Attribute extends Entity {
     constructor(name, description, image, x, y, width, height, level, multiplier) {
-        super(name, description, image, x, y, width, height, Entity.ATTRIBUTE, level, multiplier);
+        super(100, name, description, image, x, y, width, height, Entity.ATTRIBUTE, level, multiplier);
         this.baseLevel = level;
         this.level = level;
         this.multiplier = multiplier;
@@ -807,8 +807,8 @@ const Plain = require('./Plain.js');
 const Door = require('./Door.js');
 
 class Building extends Plain {
-    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        super(name, description, image, x, y, width, height, plainSpace);
+    constructor(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(id, name, description, image, x, y, width, height, plainSpace);
         this.door = Door.create();
         this.state = state;
         this.level = level;
@@ -883,7 +883,7 @@ class Camera {
 
     updateCanvasList() {
         for (let canvas of this.canvasList) {
-            canvas.canvasList = [];
+            canvas.componentList = [];
         }
     }
 
@@ -994,8 +994,8 @@ module.exports = Canvas;
 const Person = require('./Person.js');
 
 class Character extends Person {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, characterClass) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Person.CHARACTER);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, characterClass) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Person.CHARACTER);
         this.characterClass = characterClass;
     }
 }
@@ -1009,8 +1009,8 @@ module.exports = Character;
 const Component = require('./Component.js');
 
 class CharacterComponent extends Component {
-    constructor(id, x, y, layer, color, width, height, type, back, left, right, backLeft, backRight, frontLeft, frontRight) {
-        super(id, x, y, layer, color, width, height, type)
+    constructor(id, x, y, layer, width, height, type, color, componentType, back, left, right, backLeft, backRight, frontLeft, frontRight) {
+        super(id, x, y, layer, width, height, type, color, componentType)
         this.back = back;
         this.left = left;
         this.right = right;
@@ -1026,9 +1026,10 @@ class CharacterComponent extends Component {
             character.x,
             character.y,
             character.id,
-            "",
             character.width,
             character.height,
+            Component.IMAGE,
+            "red",
             Component.IMAGE,
             "",
             "",
@@ -1077,7 +1078,7 @@ class Component {
         this.check = true;
     }
 
-    drawImage(ctx) {  
+    drawImage(ctx) {
         if (!this.check) {
             if (this.color) {
                 // this.image = new Image();
@@ -1219,13 +1220,14 @@ const Inventory = require('./Inventory.js');
 const Person = require('./Person.js');
 
 class DemiGod extends Character {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
     }
 
     static create(name, x, y) {
         return new DemiGod(
-            name, 
+            0,
+            name,   
             "DemiGod",
             "",
             x, y,
@@ -1306,13 +1308,14 @@ const State = require('./State.js');
 const Inventory = require('./Inventory.js');
 
 class Door extends Props {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount);
         this.locked = false;
     }
 
-    static create() {
+    static create(id) {
         return new Door(
+            id,
             "Door",
             "A wooden door",
             "",
@@ -1438,6 +1441,7 @@ class Engine extends EE{
         this.on('key', (event) => this.keyDown(event.direction, event.down));
         this.on('click', (event) => this.onClick(event.clientX, event.clientY));
         this.on('nextScene', () => this.nextScene())
+        this.player = null;
         this.gameState = {
             scene: "",
             entityCount: 1,
@@ -1454,6 +1458,7 @@ class Engine extends EE{
     }
 
     createLevel(levelWidth, levelHeight, entityList) {
+        console.log(entityList)
         let entityXSize;
         let entityYSize;
         let xSize = Math.ceil(levelWidth / this.gameSpace.width);
@@ -1474,18 +1479,17 @@ class Engine extends EE{
 
 
     createScene(name, levelWidth, levelHeight, level, func) {
-        console.log(level)
         return new Scene(name, this.createLevel(levelWidth, levelHeight, level), func)
     }
 
     addScene(scene) {
         this.gameState.sceneHandler.addScene(scene);
+        console.log(this.gameState.sceneHandler.sceneList)
     }
 
     prepareGame(game) {
         let list = []
         for (let scene of game) {
-            console.log(scene[4])
             list.push(this.createScene(scene[0], scene[1], scene[2], scene[3], scene[4])) //name, width, height, list, func
         }
         this.addScene(this.gameState.sceneHandler.joinScenes(list))
@@ -1499,16 +1503,21 @@ class Engine extends EE{
     }
 
     updateGame() {
-        // if (this.gameState.scene === "openWorld") {
-        //     this.gameSpace.update()
-        // }
-        this.gameSpace.update(this.gameState.sceneHandler.getLevel());
+        this.gameState.sceneHandler.getLevel().get(this.gameSpace.levelIdx).entityList = this.gameSpace.entityList;
+        this.gameSpace.update();
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
 
+
+    setLevel(level) {
+        this.gameSpace.setLevel(level);
+    }
+
+
     onClick(x, y) {
+        console.log(this.gameState.scene)
         switch(this.gameState.scene) {
             case 'openWorld': this.gameSpace.whatDidPlayerClick(x, y); break;
             case 'mainScreen': this.gameSpace.clickMainScreen(x, y);
@@ -1517,19 +1526,29 @@ class Engine extends EE{
 
     nextScene() {
         this.gameState.sceneHandler.nextScene();
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel())
+        for (let idx = 1; idx < this.gameSpace.level.matrix.size; idx++) { //add id values as the entity counter goes up
+            for (let entity of this.gameSpace.level.get(idx).entityList) {
+                entity.id = this.gameState.entityCount;
+                console.log(entity)
+                this.gameState.entityCount += 1;
+            }
+        }
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel());
+        this.camera.updateCanvasList();
     }
 
     start() {
         setInterval(() => {
             this.updateGame()
         }, this.refreshRate)
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel())
         this.gameState.sceneHandler.runScene();
     }
 
     mainScreen() {
         this.gameState.scene = 'mainScreen';
         console.log(this.gameState.scene)
-        // this.addCharacter(Icon.startButton(this.gameSpace.width / 2, this.gameSpace.height / 2, 450, 200, 'Start Game'));
     }
 
     openWorld() {
@@ -1540,8 +1559,8 @@ class Engine extends EE{
 module.exports = Engine;
 },{"./AdjacencyMatrix.js":2,"./Camera.js":6,"./Controller.js":12,"./Icon.js":25,"./Scene.js":38,"./SceneHandler.js":39,"events":1}],21:[function(require,module,exports){
 class Entity {
-    constructor(name, description, image, x, y, width, height, entityType) {
-        this.id = Math.floor((Math.random() * 1000000) + 1);
+    constructor(id, name, description, image, x, y, width, height, entityType) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;
@@ -1707,13 +1726,15 @@ class GameSpace {
     }
 
     locationChecker(x, y, object) {
-        console.log(x, y, object)
         return (object.x < x && object.x + object.width > x && object.y < y && object.y + object.height > y)
     }
 
     whatDidPlayerClick(x, y) {
+        x += 52;
+        y += 53;
         let walkCheck = true;
         for (let entity of this.entityList) {
+            console.log(entity, x, y)
             if (this.locationChecker(x, y, entity)) {
                 //interact with item;
                 this.player = entity;
@@ -1722,11 +1743,14 @@ class GameSpace {
         }
 
         if (walkCheck) {
+            console.log("madei ti")
             this.clickMove(x, y);
         }
     }
 
     clickMainScreen(x, y) {
+        x += 225;
+        y += 101.5;
         let startButton;
         for (let entity of this.entityList) {
             if (entity.name === 'startButton') {
@@ -1735,15 +1759,16 @@ class GameSpace {
         }
 
         if (this.locationChecker(x, y, startButton)) {
-            console.log("m")
             this.emitEvent('nextScene');
         }
     }
 
-    update(level) {
+    setLevel(level) {
         this.level = level;
-        this.entityList = this.level.matrix.get(this.levelIdx).entityList;
-        this.level.set(this.levelIdx, this.entityList);
+        this.entityList = this.level.get(this.levelIdx).entityList;
+    }
+
+    update() {
         if (this.player) {
             this.entityListPositionUpdate();
             let playerInEntity;
@@ -1842,66 +1867,80 @@ class GameSpace {
     }
 
     clickMove(x, y) {
-        // if (this.player) {
-        //     this.moveLocation = this.matrix.traverse(this.player.x, this.player.y, x, y);
-        //     this.player.moveIdx = 0;
-        // }
         if (this.player) {
-            if (!this.cameraState) {
-                let playerInEntity;
-                for (let entity of this.entityList) {
-                    if (entity === this.player) {
-                        playerInEntity = entity;
-                    }
-                }
-
-                playerInEntity.currentSteps = 1;
-                playerInEntity.start = {};
-                playerInEntity.start.x = playerInEntity.x;
-                playerInEntity.start.y = playerInEntity.y;
-                x -= playerInEntity.width / 2;
-                y -= playerInEntity.height / 2;
-
-                let xabs = Math.abs(x - playerInEntity.x);
-                let yabs = Math.abs(y - playerInEntity.y);
-                let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-                playerInEntity.steps = Math.floor(length) / 25;
-                playerInEntity.moving = true;
-                playerInEntity.direction = {};
-                playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
-                playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
-                playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
-            } else {
-                for (let entity of this.entityList) {
-                    let playerInEntity;
-                    for (let entity of this.entityList) {
-                        if (entity === this.player) {
-                            playerInEntity = entity;
-                        }
-                    }
-                    if (entity !== this.player) {
-                        entity.currentSteps = 1;
-                        entity.start = {}
-                        entity.start.x = entity.x;
-                        entity.start.y = entity.y;
-                        let xchange = playerInEntity.x - x;
-                        let ychange = playerInEntity.y - y;
-                        x = entity.x + xchange + playerInEntity.width / 2;
-                        y = entity.y + ychange + playerInEntity.height / 2;
-
-                        let xabs = Math.abs(entity.start.x + x);
-                        let yabs = Math.abs(entity.start.y + y);
-                        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-                        entity.steps = Math.floor(length) / 25;
-                        entity.moving = true;
-                        entity.direction = {};
-                        entity.direction.x = (entity.x - x) / entity.steps;
-                        entity.direction.y = (entity.y - y) / entity.steps;
-                        playerInEntity.moving = true;
-                    }
+            let playerInEntity;
+            for (let entity of this.entityList) {
+                if (entity === this.player) {
+                    playerInEntity = entity;
                 }
             }
-        }
+
+            playerInEntity.currentSteps = 1;
+            playerInEntity.start = {};
+            playerInEntity.start.x = playerInEntity.x;
+            playerInEntity.start.y = playerInEntity.y;
+            x -= playerInEntity.width / 2;
+            y -= playerInEntity.height / 2;
+
+            let xabs = Math.abs(x - playerInEntity.x);
+            let yabs = Math.abs(y - playerInEntity.y);
+            let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+            playerInEntity.steps = Math.floor(length) / 25;
+            playerInEntity.moving = true;
+            playerInEntity.direction = {};
+            playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
+            playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
+            playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
+
+            let differenceX = playerInEntity.x + (x - playerInEntity.x) / playerInEntity.steps + 1;
+            let differenceY = playerInEntity.y + (y - playerInEntity.y) / playerInEntity.steps + 1;
+
+            if (differenceX > 0 && differenceY > 0) {                  //Check what direction the character is walking in
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'left';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'up'
+                } else {
+                    playerInEntity.movingDirection = 'upLeft'
+                }
+            } else if (differenceX < 0 && differenceY < 0) {
+                differenceX = Math.abs(differenceX);
+                differenceY = Math.abs(differenceY);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'right';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'down'
+                } else {
+                    playerInEntity.movingDirection = 'downRight'
+                }
+            } else if (differenceX < 0 && differenceY > 0) {
+                differenceX = Math.abs(differenceX);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'right';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'up'
+                } else {
+                    playerInEntity.movingDirection = 'upRight'
+                }
+            } else if (differenceX > 0 && differenceY < 0) {
+                differenceY = Math.abs(differenceY);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'left';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'down'
+                } else {
+                    playerInEntity.movingDirection = 'downLeft'
+                }
+            } else if (differenceX === 0 && differenceY < 0) {
+                playerInEntity.moveDirection = 'down';
+            } else if (differenceX === 0 && differenceY > 0) {
+                playerInEntity.moveDirection = 'up';
+            } else if (differenceX > 0 && differenceY === 0) {
+                playerInEntity.moveDirection = 'left';
+            } else if (differenceX < 0 && differenceY === 0) {
+                playerInEntity.moveDirection = 'right';
+            }
+        }   
     }
 
 
@@ -1948,8 +1987,8 @@ module.exports = Greece;
 const Entity = require('./Entity.js');
 
 class Icon extends Entity {
-    constructor(name, description, image, x, y, width, height, text, font, fillStyle, textAlign, use) {
-        super(name, description, image, x, y, width, height, Entity.ICON)
+    constructor(id, name, description, image, x, y, width, height, text, font, fillStyle, textAlign, use) {
+        super(id, name, description, image, x, y, width, height, Entity.ICON)
         this.text = text;
         this.font = font;
         this.fillStyle = fillStyle;
@@ -1970,6 +2009,7 @@ class Icon extends Entity {
 
     static startButton(x, y, width, height, text) {
         return new Icon(
+            1,
             "startButton",
             "startButton",
             "grey",
@@ -1981,23 +2021,6 @@ class Icon extends Entity {
             "center",
             () => {
                 this.emitEvent(this.text, this);
-            }
-        )
-    }
-
-    static blackBox(x, y, width, height) {
-        return new Icon(
-            "blackBox",
-            "",
-            "black",
-            x, y,
-            width, height,
-            null,
-            null,
-            null,
-            null,
-            () => {
-                this.emitEvent(this.text, this)
             }
         )
     }
@@ -2030,8 +2053,8 @@ module.exports = Intelligence;
 const Entity = require('./Entity.js')
 
 class Interactable extends Entity {
-    constructor(name, description, image, x, y, width, height, interactableType, stats, state, inventory, endurance) {
-        super(name, description, image, x, y, width, height, Entity.INTERACTABLE)
+    constructor(id, name, description, image, x, y, width, height, interactableType, stats, state, inventory, endurance) {
+        super(id, name, description, image, x, y, width, height, Entity.INTERACTABLE)
         this.interactableType = interactableType;
         this.stats = stats;
         this.state = state;
@@ -2097,8 +2120,8 @@ module.exports = Italy;
 const Entity = require('./Entity.js');
 
 class Location extends Entity {
-    constructor(name, description, image, x, y, width, height, locationsMap) {
-        super(name, description, image, x, y, width, height, Entity.LOCATION);
+    constructor(id, name, description, image, x, y, width, height, locationsMap) {
+        super(id, name, description, image, x, y, width, height, Entity.LOCATION);
         this.locationsMap = locationsMap
     }
 }
@@ -2162,8 +2185,8 @@ module.exports = Npc;
 const Interactable = require('./Interactable.js');
 
 class Person extends Interactable {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
-        super(name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
+        super(id, name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
         this.body = body;
         this.alliance = alliance;
         this.personType = personType;
@@ -2182,8 +2205,8 @@ module.exports = Person;
 const Entity = require('./Entity.js');
 
 class Plain extends Entity {
-    constructor(name, description, image, x, y, width, height, plainSpace) {
-        super(name, description, image, x, y, width, height, Entity.PLAIN);
+    constructor(id, name, description, image, x, y, width, height, plainSpace) {
+        super(id, name, description, image, x, y, width, height, Entity.PLAIN);
         this.plainSpace = plainSpace;
     }
 }
@@ -2204,8 +2227,8 @@ module.exports = Planet
 const Usable = require('./Usable.js');
 
 class Props extends Usable {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount)
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount)
     }
 }
 
@@ -2254,8 +2277,8 @@ class SceneHandler {
         this.currentScene.run();
     }
 
-    nextScene() {
-        this.currentScene = this.currentScene.connectedScenes[0];
+    nextScene(choice = 0) {
+        this.currentScene = this.currentScene.connectedScenes[choice];
         this.runScene();
     }
 
@@ -2279,12 +2302,12 @@ module.exports = SceneHandler;
 const Building = require('./Building.js');
 
 class School extends Building {
-    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
+    constructor(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        super(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage)
     }
 
-    static create(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        return new School(
+    static create(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
+        return new School(id,
             name, description,
             image, x, y,
             width, height,
@@ -2295,8 +2318,9 @@ class School extends Building {
         )
     }
 
-    static greekSchool() {
+    static greekSchool(id) {
         return new School(
+            id,
             "Greek school",
             "School in the greek faction of earth",
             "",
@@ -2691,8 +2715,8 @@ module.exports = UpgradeToken
 const Interactable = require('./Interactable.js');
 
 class Usable extends Interactable {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
-        super(name, description, image, x, y, width, height, Interactable.USABLE, stats, state, inventory, endurance)
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
+        super(id, name, description, image, x, y, width, height, Interactable.USABLE, stats, state, inventory, endurance)
         this.useTime = useTime;
         this.useAmount = useAmount;
     }
@@ -2752,31 +2776,65 @@ const earth = Earth.create(); //create the world
 const engine = new Engine(
     new GameState(
         0.8,
-        earth,
+        earth, //pass in the world
         document.body.clientHeight,
         document.body.clientWidth
     ),
-    20,
+    50, //framerate
     1
 )
 
-let game = [
+const scene1 = [
+    "MainScreen", 
+    document.body.clientWidth, 
+    document.body.clientHeight, 
     [
-        "MainScreen", document.body.clientWidth, document.body.clientHeight, [
-            Icon.startButton(engine.gameSpace.width / 2, engine.gameSpace.height / 2, 450, 200, 'Start Game')
-        ], () => { engine.mainScreen() }
-    ],
-    ["Intro", 3000, 1500, [
-        DemiGod.create("bad", 1000, 500),
+        Icon.startButton(engine.gameSpace.width / 2, engine.gameSpace.height / 2, 450, 200, 'Start Game')
+    ], 
+    () => { 
+        engine.mainScreen() 
+    }
+]
+
+const scene2 = [
+    "Intro", //name
+    3000, //width
+    1500, //height
+    [   
+        DemiGod.create("bad", 900, 900), //entities
         DemiGod.create("ygit", 500, 500),
         DemiGod.create("Hazar", 100, 100)
-    ], () => { engine.openWorld() }],
-    ["Second chapter", 3000, 1500, [
+    ], 
+    () => { 
+        engine.openWorld() //function to play
+    }
+]
+
+scene3 = [
+    "Second chapter", 
+    3000, 
+    1500, 
+    [
         DemiGod.create("yuh", 1000, 500)
-    ], ()=>{}],
-    ["Third Chapter", 6000, 2000, [
+    ], 
+    ()=>{}
+]
+
+scene4 = [
+    "Third Chapter", 
+    6000, 
+    2000, 
+    [
         DemiGod.create("yeah", 500, 500)
-    ], ()=>{}]
+    ], 
+    ()=>{}
+]
+
+let game = [
+    scene1,
+    scene2,
+    scene3,
+    scene4
 ]
 
 engine.prepareGame(game);

@@ -43,7 +43,7 @@ class Camera {
 
     updateCanvasList() {
         for (let canvas of this.canvasList) {
-            canvas.canvasList = [];
+            canvas.componentList = [];
         }
     }
 

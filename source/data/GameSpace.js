@@ -121,13 +121,15 @@ class GameSpace {
     }
 
     locationChecker(x, y, object) {
-        console.log(x, y, object)
         return (object.x < x && object.x + object.width > x && object.y < y && object.y + object.height > y)
     }
 
     whatDidPlayerClick(x, y) {
+        x += 52;
+        y += 53;
         let walkCheck = true;
         for (let entity of this.entityList) {
+            console.log(entity, x, y)
             if (this.locationChecker(x, y, entity)) {
                 //interact with item;
                 this.player = entity;
@@ -136,11 +138,14 @@ class GameSpace {
         }
 
         if (walkCheck) {
+            console.log("madei ti")
             this.clickMove(x, y);
         }
     }
 
     clickMainScreen(x, y) {
+        x += 225;
+        y += 101.5;
         let startButton;
         for (let entity of this.entityList) {
             if (entity.name === 'startButton') {
@@ -149,15 +154,16 @@ class GameSpace {
         }
 
         if (this.locationChecker(x, y, startButton)) {
-            console.log("m")
             this.emitEvent('nextScene');
         }
     }
 
-    update(level) {
+    setLevel(level) {
         this.level = level;
-        this.entityList = this.level.matrix.get(this.levelIdx).entityList;
-        this.level.set(this.levelIdx, this.entityList);
+        this.entityList = this.level.get(this.levelIdx).entityList;
+    }
+
+    update() {
         if (this.player) {
             this.entityListPositionUpdate();
             let playerInEntity;
@@ -256,66 +262,80 @@ class GameSpace {
     }
 
     clickMove(x, y) {
-        // if (this.player) {
-        //     this.moveLocation = this.matrix.traverse(this.player.x, this.player.y, x, y);
-        //     this.player.moveIdx = 0;
-        // }
         if (this.player) {
-            if (!this.cameraState) {
-                let playerInEntity;
-                for (let entity of this.entityList) {
-                    if (entity === this.player) {
-                        playerInEntity = entity;
-                    }
-                }
-
-                playerInEntity.currentSteps = 1;
-                playerInEntity.start = {};
-                playerInEntity.start.x = playerInEntity.x;
-                playerInEntity.start.y = playerInEntity.y;
-                x -= playerInEntity.width / 2;
-                y -= playerInEntity.height / 2;
-
-                let xabs = Math.abs(x - playerInEntity.x);
-                let yabs = Math.abs(y - playerInEntity.y);
-                let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-                playerInEntity.steps = Math.floor(length) / 25;
-                playerInEntity.moving = true;
-                playerInEntity.direction = {};
-                playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
-                playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
-                playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
-            } else {
-                for (let entity of this.entityList) {
-                    let playerInEntity;
-                    for (let entity of this.entityList) {
-                        if (entity === this.player) {
-                            playerInEntity = entity;
-                        }
-                    }
-                    if (entity !== this.player) {
-                        entity.currentSteps = 1;
-                        entity.start = {}
-                        entity.start.x = entity.x;
-                        entity.start.y = entity.y;
-                        let xchange = playerInEntity.x - x;
-                        let ychange = playerInEntity.y - y;
-                        x = entity.x + xchange + playerInEntity.width / 2;
-                        y = entity.y + ychange + playerInEntity.height / 2;
-
-                        let xabs = Math.abs(entity.start.x + x);
-                        let yabs = Math.abs(entity.start.y + y);
-                        let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
-                        entity.steps = Math.floor(length) / 25;
-                        entity.moving = true;
-                        entity.direction = {};
-                        entity.direction.x = (entity.x - x) / entity.steps;
-                        entity.direction.y = (entity.y - y) / entity.steps;
-                        playerInEntity.moving = true;
-                    }
+            let playerInEntity;
+            for (let entity of this.entityList) {
+                if (entity === this.player) {
+                    playerInEntity = entity;
                 }
             }
-        }
+
+            playerInEntity.currentSteps = 1;
+            playerInEntity.start = {};
+            playerInEntity.start.x = playerInEntity.x;
+            playerInEntity.start.y = playerInEntity.y;
+            x -= playerInEntity.width / 2;
+            y -= playerInEntity.height / 2;
+
+            let xabs = Math.abs(x - playerInEntity.x);
+            let yabs = Math.abs(y - playerInEntity.y);
+            let length = Math.sqrt( Math.pow(xabs, 2) + Math.pow(yabs, 2));
+            playerInEntity.steps = Math.floor(length) / 25;
+            playerInEntity.moving = true;
+            playerInEntity.direction = {};
+            playerInEntity.steps = (!playerInEntity.steps) ? 0.1 : playerInEntity.steps;
+            playerInEntity.direction.x = (x - playerInEntity.x) / playerInEntity.steps;
+            playerInEntity.direction.y = (y - playerInEntity.y) / playerInEntity.steps;
+
+            let differenceX = playerInEntity.x + (x - playerInEntity.x) / playerInEntity.steps + 1;
+            let differenceY = playerInEntity.y + (y - playerInEntity.y) / playerInEntity.steps + 1;
+
+            if (differenceX > 0 && differenceY > 0) {                  //Check what direction the character is walking in
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'left';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'up'
+                } else {
+                    playerInEntity.movingDirection = 'upLeft'
+                }
+            } else if (differenceX < 0 && differenceY < 0) {
+                differenceX = Math.abs(differenceX);
+                differenceY = Math.abs(differenceY);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'right';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'down'
+                } else {
+                    playerInEntity.movingDirection = 'downRight'
+                }
+            } else if (differenceX < 0 && differenceY > 0) {
+                differenceX = Math.abs(differenceX);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'right';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'up'
+                } else {
+                    playerInEntity.movingDirection = 'upRight'
+                }
+            } else if (differenceX > 0 && differenceY < 0) {
+                differenceY = Math.abs(differenceY);
+                if (((differenceX / 4) * 3) > differenceY) {
+                    playerInEntity.moveDirection = 'left';
+                } else if (((differenceY / 4) * 3) > differenceX) {
+                    playerInEntity.movingDirection = 'down'
+                } else {
+                    playerInEntity.movingDirection = 'downLeft'
+                }
+            } else if (differenceX === 0 && differenceY < 0) {
+                playerInEntity.moveDirection = 'down';
+            } else if (differenceX === 0 && differenceY > 0) {
+                playerInEntity.moveDirection = 'up';
+            } else if (differenceX > 0 && differenceY === 0) {
+                playerInEntity.moveDirection = 'left';
+            } else if (differenceX < 0 && differenceY === 0) {
+                playerInEntity.moveDirection = 'right';
+            }
+        }   
     }
 
 

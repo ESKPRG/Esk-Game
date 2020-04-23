@@ -1,8 +1,8 @@
 const Component = require('./Component.js');
 
 class CharacterComponent extends Component {
-    constructor(id, x, y, layer, color, width, height, type, back, left, right, backLeft, backRight, frontLeft, frontRight) {
-        super(id, x, y, layer, color, width, height, type)
+    constructor(id, x, y, layer, width, height, type, color, componentType, back, left, right, backLeft, backRight, frontLeft, frontRight) {
+        super(id, x, y, layer, width, height, type, color, componentType)
         this.back = back;
         this.left = left;
         this.right = right;
@@ -18,9 +18,10 @@ class CharacterComponent extends Component {
             character.x,
             character.y,
             character.id,
-            "",
             character.width,
             character.height,
+            Component.IMAGE,
+            "red",
             Component.IMAGE,
             "",
             "",

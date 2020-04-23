@@ -5,13 +5,14 @@ const Inventory = require('./Inventory.js');
 const Person = require('./Person.js');
 
 class DemiGod extends Character {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
-        super(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
+        super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
     }
 
     static create(name, x, y) {
         return new DemiGod(
-            name, 
+            0,
+            name,   
             "DemiGod",
             "",
             x, y,

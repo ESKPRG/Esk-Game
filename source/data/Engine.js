@@ -41,6 +41,7 @@ class Engine extends EE{
     }
 
     createLevel(levelWidth, levelHeight, entityList) {
+        console.log(entityList)
         let entityXSize;
         let entityYSize;
         let xSize = Math.ceil(levelWidth / this.gameSpace.width);
@@ -61,18 +62,17 @@ class Engine extends EE{
 
 
     createScene(name, levelWidth, levelHeight, level, func) {
-        console.log(level)
         return new Scene(name, this.createLevel(levelWidth, levelHeight, level), func)
     }
 
     addScene(scene) {
         this.gameState.sceneHandler.addScene(scene);
+        console.log(this.gameState.sceneHandler.sceneList)
     }
 
     prepareGame(game) {
         let list = []
         for (let scene of game) {
-            console.log(scene[4])
             list.push(this.createScene(scene[0], scene[1], scene[2], scene[3], scene[4])) //name, width, height, list, func
         }
         this.addScene(this.gameState.sceneHandler.joinScenes(list))
@@ -86,16 +86,21 @@ class Engine extends EE{
     }
 
     updateGame() {
-        // if (this.gameState.scene === "openWorld") {
-        //     this.gameSpace.update()
-        // }
-        this.gameSpace.update(this.gameState.sceneHandler.getLevel());
+        this.gameState.sceneHandler.getLevel().get(this.gameSpace.levelIdx).entityList = this.gameSpace.entityList;
+        this.gameSpace.update();
         this.camera.updateLocations(this.gameSpace.returnEntityLocations())
         this.camera.updateGame()
     }
 
 
+
+    setLevel(level) {
+        this.gameSpace.setLevel(level);
+    }
+
+
     onClick(x, y) {
+        console.log(this.gameState.scene)
         switch(this.gameState.scene) {
             case 'openWorld': this.gameSpace.whatDidPlayerClick(x, y); break;
             case 'mainScreen': this.gameSpace.clickMainScreen(x, y);
@@ -104,19 +109,29 @@ class Engine extends EE{
 
     nextScene() {
         this.gameState.sceneHandler.nextScene();
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel())
+        for (let idx = 1; idx < this.gameSpace.level.matrix.size; idx++) { //add id values as the entity counter goes up
+            for (let entity of this.gameSpace.level.get(idx).entityList) {
+                entity.id = this.gameState.entityCount;
+                console.log(entity)
+                this.gameState.entityCount += 1;
+            }
+        }
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel());
+        this.camera.updateCanvasList();
     }
 
     start() {
         setInterval(() => {
             this.updateGame()
         }, this.refreshRate)
+        this.gameSpace.setLevel(this.gameState.sceneHandler.getLevel())
         this.gameState.sceneHandler.runScene();
     }
 
     mainScreen() {
         this.gameState.scene = 'mainScreen';
         console.log(this.gameState.scene)
-        // this.addCharacter(Icon.startButton(this.gameSpace.width / 2, this.gameSpace.height / 2, 450, 200, 'Start Game'));
     }
 
     openWorld() {

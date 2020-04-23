@@ -1,8 +1,8 @@
 const Interactable = require('./Interactable.js');
 
 class Person extends Interactable {
-    constructor(name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
-        super(name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, personType) {
+        super(id, name, description, image, x, y, width, height, Interactable.PERSON, stats, state, inventory, endurance);
         this.body = body;
         this.alliance = alliance;
         this.personType = personType;
