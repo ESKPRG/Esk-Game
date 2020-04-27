@@ -5,7 +5,7 @@ const Inventory = require('./Inventory.js');
 const Person = require('./Person.js');
 
 class DemiGod extends Character {
-    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance) {
+    constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, controllable) {
         super(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, body, alliance, Character.DEMIGOD);
     }
 
@@ -14,10 +14,10 @@ class DemiGod extends Character {
             0,
             name,   
             "DemiGod",
-            "",
+            "assets/Npc-1.png",
             x, y,
             100,
-            100,
+            120,
             Stats.create(
                 10, 2,
                 10, 1,
@@ -38,7 +38,8 @@ class DemiGod extends Character {
             new Inventory(),
             null,
             null, //new body after change
-            Person.GOOD
+            Person.GOOD,
+            Person.CONTROL
         )
     }
 }

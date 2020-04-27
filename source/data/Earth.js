@@ -14,32 +14,16 @@ class Earth extends Planet {
     static create() {
         return new Earth([
             Greece.create({
-                1: District.create({
-                    1: School.greekSchool(),
-                },
-                "School district"),
-                2: District.create({
-                    1: ShoppingMall.create({
-                        1: Shop.create(),
-                        2: Shop.create()
-                    })
-                }, "Shopping district")
+                "School District": District.schoolDistrict(),
+                "Central District": District.centralDistrict()
             }),
             Italy.create({
-                1: District.create({
-                    1: School.greekSchool(),
-                },
-                "School district"),
-                2: District.create({
-                    1: ShoppingMall.create({
-                        1: Shop.create()
-                    })
-                }, "Shopping district")
+                "School District": District.schoolDistrict(),
+                "Central District": District.centralDistrict()
             })
         ],
         "Earth")
     }
-    
 }
 
 module.exports = Earth

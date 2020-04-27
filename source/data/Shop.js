@@ -3,19 +3,20 @@ const ShopKeeper = require('./ShopKeeper.js')
 const ShopUpgradePlan = require('./ShopUpgradePlan.js')
 
 class Shop extends Building {
-    constructor(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage) {
-        super(name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage);
+    constructor(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage, outsideWidth, outsideHeight, floorList) {
+        super(id, name, description, image, x, y, width, height, plainSpace, state, level, upgradePlan, insideImage, outsideWidth, outsideHeight, floorList);
     }
 
-    static create() {
+    static create(x, y) {
         let plan = new ShopUpgradePlan();
         plan.prepare();
 
         return new Shop(
+            0,
             "Shop",
             "A shop",
             "",
-            0, 0,
+            x, y,
             400, 300,
             [
                 ShopKeeper.create(0, 0)
@@ -23,7 +24,10 @@ class Shop extends Building {
             Building.CLOSED,
             1,
             plan,
-            ""
+            "",
+            500,
+            500,
+            []
         )
     }
 }

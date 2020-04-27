@@ -1,7 +1,7 @@
 const Props = require('./Props.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
-const Inventory = require('./Inventory.js');
+const NoInventory = require('./NoInventory.js');
 
 class Door extends Props {
     constructor(id, name, description, image, x, y, width, height, stats, state, inventory, endurance, useTime, useAmount) {
@@ -9,9 +9,9 @@ class Door extends Props {
         this.locked = false;
     }
 
-    static create(id) {
+    static create() {
         return new Door(
-            id,
+            0,
             "Door",
             "A wooden door",
             "",
@@ -34,7 +34,7 @@ class Door extends Props {
                 50,
                 0
             ),
-            new Inventory(),
+            new NoInventory(),
             100,
             200,
             null

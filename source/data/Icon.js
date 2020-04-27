@@ -7,7 +7,6 @@ class Icon extends Entity {
         this.font = font;
         this.fillStyle = fillStyle;
         this.textAlign = textAlign;
-
         this.use = use;
     }
 
@@ -36,6 +35,22 @@ class Icon extends Entity {
             () => {
                 this.emitEvent(this.text, this);
             }
+        )
+    }
+
+    static mainMenu(x, y, width, height) {
+        return new Icon(
+            0,
+            "mainMenu",
+            "mainMenu",
+            "brown",
+            x, y,
+            width, height,
+            null,
+            null,
+            null,
+            null,
+            null
         )
     }
 }

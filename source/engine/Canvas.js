@@ -25,37 +25,36 @@ class Canvas {
         this.parentNode.appendChild(this.canvas)
     }
 
-    deleteSelf() {
-        console.log("remove")
-        this.parentNode.removeChild(this.canvas);
-    }
-
-    isNotEmpty() {
-        return (this.componentList.length > 0);
-    }
-
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     draw() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let component of this.componentList) {
             component.drawImage(this.context);
         }
-        
     }
 
     update(component) {
         for (let value of this.componentList) {
             if (value.id === component.id) {
-                value.update(component)
+                if (value.update(component)) { 
+                    this.draw();
+                }
             }
         }
     }
 
+    hasThisComponent(entity) {
+        for (let component of this.componentList) {
+            if (component.id == entity.id) return true;
+        }
+    }
 
     add(component) {
         this.componentList.push(component);
+        component.drawImage(this.context);
     }
 
     get() {

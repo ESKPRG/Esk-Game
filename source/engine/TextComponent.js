@@ -13,10 +13,10 @@ class TextComponent extends Component {
         return new TextComponent(
             object.id, object.x,
             object.y,
-            object.id,
+            2,
             object.width,
             object.height,
-            null,
+            Component.BLOCK,
             object.image,
             object.text,
             object.font,

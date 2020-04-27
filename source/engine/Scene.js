@@ -1,7 +1,8 @@
 class Scene {
-    constructor(name, level, run) {
+    constructor(name, level, run, startPosition) {
         this.name = name;
         this.level = level;
+        this.startPosition = startPosition;
         this.run = run;
         this.connectedScenes = []
     }

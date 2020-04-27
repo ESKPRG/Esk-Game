@@ -211,6 +211,10 @@ class AdjacencyMatrix {
     set(idx, entityList) {
         this.matrix.get(idx).entityList = entityList;
     }
+
+    size() {
+        return this.matrix.size;
+    }
     
 
     createMap() {

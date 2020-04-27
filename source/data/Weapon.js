@@ -1,6 +1,7 @@
 const Equipable = require('./Equipable.js');
 const Stats = require('./Stats.js');
 const State = require('./State.js');
+const NoInventory = require('./NoInventory.js');
 
 class Weapon extends Equipable {
     constructor(id, name, description, image, stats, state, inventory, endurance, rarity, price, level, slot, damage, accuracy, reach) {
@@ -31,7 +32,7 @@ class Weapon extends Equipable {
                 0,
                 3 //3 kg
             ),
-            new noInventory(),
+            new NoInventory(),
             100,
             Item.COMMON,
             5,

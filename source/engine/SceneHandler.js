@@ -41,8 +41,12 @@ class SceneHandler {
         }
     }
 
-    getLevel() {
-        return this.currentScene.level;
+    getScene() {
+        return this.currentScene;
+    }
+
+    updateScene(entityList) {
+        this.currentScene.level = entityList;
     }
 }
 

@@ -1,12 +1,13 @@
 const Country = require('./Country.js');
 
 class Italy extends Country {
-    constructor(name, description, image, x, y, width, height, locationsMap, religion, wealth){
-        super(name, description, image, x, y, width, height, locationsMap, religion, wealth);
+    constructor(id, name, description, image, x, y, width, height, locationsMap, religion, wealth){
+        super(id, name, description, image, x, y, width, height, locationsMap, religion, wealth);
     }
 
     static create(locationsMap) {
         return new Italy(
+            0,
             "Italy",
             "The country Italy",
             "",

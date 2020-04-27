@@ -19,5 +19,6 @@ Entity.PLAIN = 'plain';
 Entity.ATTRIBUTE = 'attribute';
 Entity.QUEST = 'quest';
 Entity.LOCATION = 'location';
+Entity.COUNTRY = 'country';
 
 module.exports = Entity;
