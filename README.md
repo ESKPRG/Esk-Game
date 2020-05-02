@@ -1,6 +1,6 @@
 # Esk-Game
 
-![Title](source/assets/main.png?raw=true "Title")
+![Title](source/assets/bytefull2.png?raw=true "Title")
 
 The game project for the sixth-form students in esk.
 
